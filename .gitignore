@@ -1,6 +1,15 @@
+<<<<<<< HEAD
 .venv/
 __pycache__/
 *.py[cod]
 .env
 # .env.*
 # !.env.example
+=======
+.env
+.venv/
+.vscode/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+>>>>>>> 3e08d0de30e4b712c5b3c8c50b4f61e4d04df639
