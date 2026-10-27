@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#153b30">
+    <title>Approval Center | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023b">
+    <link rel="stylesheet" href="/static/approval-center.css?v=20261023b">
+    <script src="/static/approval-center.js?v=20261023b" defer></script>
+    <script src="/static/mobile-nav.js?v=20261023a" defer></script>
+</head>
+<body>
+    <div class="approval-shell">
+        <aside class="approval-sidebar">
+            <a class="os-brand" href="/" aria-label="AI Workforce OS home"><span class="os-brand-mark">W</span><span class="os-brand-copy"><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a>
+            <span class="side-label">WORKSPACE</span>
+            <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-expanded="false" aria-controls="approvalNavigation">Workspace menu</button>
+            <nav id="approvalNavigation" class="mobile-nav" aria-label="Workspace navigation"><a href="/dashboard"><i>◫</i>Overview</a><a href="/requests"><i>↗</i>My requests</a><a class="active" href="/approval-center"><i>✓</i>Approval center</a><a href="/workforce-center"><i>⊞</i>Workforce planning</a><a href="/static/requirement-chat.html"><i>＋</i>New request</a><a href="/profile"><i>◎</i>Profile</a></nav>
+            <div class="approval-side-note"><span class="status-dot"></span><span><strong>Governed decisions</strong><small>Every decision is recorded.</small></span></div>
+        </aside>
+        <main class="approval-main">
+            <header class="approval-topbar"><span>Company workspace <b>/</b> Approval center</span><span id="roleLabel" class="role-label">Checking role…</span></header>
+            <div class="approval-content">
+                <section class="approval-heading"><div><p class="os-eyebrow">GOVERNANCE WORKFLOW</p><h1 class="os-heading">Approval center.</h1><p>Review the request, record a reasoned decision, and let the workflow continue only when its approval gate is satisfied.</p></div><button id="refreshApprovals" type="button" class="refresh-button" aria-label="Refresh approval queue">↻</button></section>
+                <div id="approvalAlert" class="approval-alert" role="status" aria-live="polite" hidden></div>
+                <div class="approval-layout">
+                    <section class="approval-queue-panel"><div class="queue-heading"><div><p class="os-eyebrow">YOUR QUEUE</p><h2 class="os-heading">Pending approvals <span id="pendingCount">0</span></h2></div><select id="queueFilter" aria-label="Filter approvals"><option value="Pending">Pending</option><option value="all">All decisions</option></select></div><div id="approvalQueue" class="approval-queue"><p class="queue-empty">Loading approvals…</p></div></section>
+                    <section id="approvalDetail" class="approval-detail"><div class="detail-empty"><span>✓</span><h2>Select an approval</h2><p>Approval details and decision controls appear here.</p></div></section>
+                </div>
+                <footer class="approval-footer"><span>AI WORKFORCE OS <i>·</i> GOVERNANCE</span><span>Actions are authorized server-side and recorded in the audit log.</span></footer>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

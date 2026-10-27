@@ -1,59 +1,37 @@
-<script>
-
-const token =
-localStorage.getItem("token");
-
-if(!token){
-    window.location = "/login";
-}
-
-try{
-
-    const payload =
-    JSON.parse(
-        atob(
-            token.split(".")[1]
-        )
-    );
-
-    document.getElementById(
-        "displayName"
-    ).value =
-    payload.name || "";
-
-    document.getElementById(
-        "email"
-    ).value =
-    payload.email || "";
-
-    document.getElementById(
-        "department"
-    ).value =
-    payload.department || "";
-
-}
-catch(error){
-
-    localStorage.removeItem(
-        "token"
-    );
-
-    window.location =
-        "/login";
-}
-
-function logout(){
-
-    localStorage.removeItem(
-        "token"
-    );
-
-    localStorage.removeItem(
-        "userName"
-    );
-
-    window.location =
-        "/login";
-}
-
-</script>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f6f2">
+    <title>Account profile | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/auth.css?v=20261022">
+</head>
+<body>
+    <header class="auth-header"><a class="os-brand" href="/" aria-label="AI Workforce OS home"><span class="os-brand-mark">W</span><span class="os-brand-copy"><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a><a href="/dashboard">← Return to workspace</a></header>
+    <main class="auth-shell">
+        <section class="auth-story"><span class="story-index">AI WORKFORCE OS <i>·</i> ACCOUNT</span><div class="story-copy"><p class="os-eyebrow">YOUR COMPANY IDENTITY</p><h1>One profile.<br><em>One accountable user.</em></h1><p>Your account identity helps the platform attribute work and decisions to the right person. Company roles and authority are managed separately.</p><div class="story-agents"><span>Identity</span><span>Department</span><span>Role-based access</span></div></div><div class="story-foot"><span>IDENTITY CONTEXT</span><span>COMPANY ROLE</span><span>AUDIT ATTRIBUTION</span></div></section>
+        <section class="auth-form-wrap"><div class="profile-content"><p class="auth-step">ACCOUNT PROFILE <span>01 / 01</span></p><h2>Profile details.</h2><p class="subtitle">These details come from your current signed-in session.</p><div class="profile-details"><label for="displayName">Display name</label><input id="displayName" type="text" autocomplete="name" readonly><label for="email">Email address</label><input id="email" type="email" autocomplete="email" readonly><label for="department">Department</label><input id="department" type="text" readonly><label for="profileRole">Workspace role</label><input id="profileRole" type="text" readonly></div><div class="profile-actions"><a class="btn btn-secondary" href="/dashboard">Back to workspace</a><button class="btn" type="button" onclick="logout()"><span>Sign out</span><span aria-hidden="true">↗</span></button></div><p class="profile-note">Profile editing is not available in this version. Contact your company administrator to request an update or role change.</p><div class="auth-assurance"><span class="assurance-mark">◇</span>Role changes are not available through self-service.</div></div></section>
+    </main>
+    <script>
+        fetch("/auth/me", { credentials: "same-origin" })
+            .then((response) => {
+                if (!response.ok) throw new Error("Session expired");
+                return response.json();
+            })
+            .then((user) => {
+                document.getElementById("displayName").value = user.display_name || "";
+                document.getElementById("email").value = user.email || "";
+                document.getElementById("department").value = user.department || "Not set";
+                document.getElementById("profileRole").value = user.role || "USER";
+            })
+            .catch(() => { window.location = "/login"; });
+        function logout() {
+            localStorage.removeItem("userName");
+            fetch("/auth/logout", { method: "POST", credentials: "same-origin" })
+                .finally(() => { window.location = "/login"; });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+.dashboard-error{margin:0 0 10px;padding:10px 12px;border-left:3px solid #a8473e;background:#fff1ef;color:#8d352f;font-size:11px}
+.personal-data-panel{margin-top:10px}
+.personal-data-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:12px}
+.personal-data-section{min-width:0;padding:11px;border:1px solid #e8ede8;border-radius:4px;background:#fff}
+.personal-data-section h3{margin:0 0 8px;color:#37483c;font-size:10px}
+.personal-data-list{display:grid;gap:5px}
+.personal-data-empty{margin:0;color:#87938a;font-size:9px;line-height:1.5}
+.personal-data-row{display:flex;min-width:0;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #edf0ed}
+.personal-data-row:last-child{border-bottom:0}
+.personal-data-row strong{overflow:hidden;color:#36463b;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+.personal-data-row span{flex:0 0 auto;color:#78857c;font-size:8px}
+[hidden]{display:none!important}
+@media(max-width:700px){.personal-data-grid{grid-template-columns:1fr}.personal-data-section{padding:9px}}

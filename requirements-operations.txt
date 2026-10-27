@@ -1,0 +1,4 @@
+# Optional dependencies for production secret resolution and Vertex authentication.
+azure-identity>=1.17,<2
+azure-keyvault-secrets>=4.8,<5
+google-auth>=2.30,<3

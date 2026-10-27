@@ -1,0 +1,68 @@
+.phase8-readiness{margin:0 0 14px;border-left:3px solid #315f48;background:#fbfcfa}
+.phase8-readiness .report-strip{margin:8px 0 12px;font-weight:650;line-height:1.5}
+.phase8-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid #dfe6df;border-bottom:1px solid #dfe6df}
+.phase8-metric{min-width:0;padding:11px 12px;border-right:1px solid #dfe6df;border-bottom:1px solid #dfe6df}
+.phase8-metric:nth-child(5n){border-right:0}
+.phase8-metric strong,.phase8-metric span{display:block}
+.phase8-metric strong{color:#24523d;font-size:18px;overflow-wrap:anywhere}
+.phase8-metric span{margin-top:4px;color:#65746b;font-size:10px;line-height:1.35}
+.phase8-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.phase8-details>.table-wrap,.phase8-details>.empty{min-width:0;margin:0}
+.phase8-details>p.empty{grid-column:1/-1}
+.phase9-readiness{margin:0 0 16px;border-left:3px solid #315f48;background:#fff}
+.phase9-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.phase9-head h3{margin:0;font-size:15px}
+.phase9-head p{margin:5px 0 10px;color:#65746b;font-size:11px;line-height:1.5}
+.phase9-head label{display:grid;gap:4px;min-width:120px;color:#5c6d66;font-size:10px}
+.phase9-head select{max-width:none;padding:6px;border:1px solid #cbd6ce;border-radius:3px;background:#fff;color:#254333}
+.phase9-workforce{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:10px;border-top:1px solid #dfe6df;border-bottom:1px solid #dfe6df}
+.phase9-workforce-item{min-width:0;padding:9px 10px;border-right:1px solid #dfe6df;border-bottom:1px solid #dfe6df}
+.phase9-workforce-item:nth-child(5n){border-right:0}
+.phase9-workforce-item strong,.phase9-workforce-item span{display:block}
+.phase9-workforce-item strong{color:#315f48;font-size:15px;overflow-wrap:anywhere}
+.phase9-workforce-item span{margin-top:3px;color:#65746b;font-size:9px;line-height:1.35}
+.phase9-blockers{margin-top:12px;padding:10px 12px;border-left:3px solid #ac6343;background:#fbf5f1;color:#674234}
+.phase9-blockers h4{margin:0 0 6px;font-size:12px}
+.phase9-blockers ul{margin:0;padding-left:18px;columns:2;font-size:11px;line-height:1.6}
+.phase9-executive-metrics{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.phase9-executive-metric{padding:7px 9px;border:1px solid #dce5dd;border-radius:3px;background:#f6f8f5;color:#345944;font-size:10px;text-transform:capitalize}
+.phase10-launch{margin:14px 0;border-left:3px solid #315f48}
+.phase10-status-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.phase10-status-card{min-width:0;padding:10px;border:1px solid #dfe6df;background:#f8faf7}
+.phase10-status-card strong,.phase10-status-card span{display:block}
+.phase10-status-card strong{color:#315f48;font-size:12px}
+.phase10-status-card span{margin-top:5px;color:#65746b;font-size:10px;line-height:1.45;overflow-wrap:anywhere}
+.phase10-overall{margin-top:10px;color:#315f48;font-size:17px;font-weight:750}
+.phase10-domain-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:9px}
+.phase10-domain{display:flex;justify-content:space-between;gap:8px;padding:8px 9px;border:1px solid #dfe6df;background:#f8faf7;font-size:10px}
+.phase10-domain strong{font-weight:650}
+.phase10-domain span{font-weight:700}
+.phase10-domain.ready span{color:#2c6d4d}
+.phase10-domain.blocked{border-left:2px solid #b35b42}
+.phase10-domain.blocked span{color:#994732}
+.campaign-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.campaign-card{min-width:0;padding:12px;border:1px solid #dfe6df;background:#fbfcfa}
+.campaign-card h4{margin:0;font-size:13px;color:#315f48}
+.campaign-meta{display:block;margin:5px 0;color:#65746b;font-size:10px;line-height:1.45}
+.campaign-agent{margin-top:10px;padding-top:9px;border-top:1px solid #e1e8e1}
+.campaign-agent>strong{font-size:11px}
+.campaign-agent .table-wrap{margin-top:6px;overflow-x:auto}
+.campaign-agent table{font-size:10px}
+.campaign-agent th,.campaign-agent td{padding:6px 7px}
+.campaign-blocker,.campaign-blocker-list{color:#8a4c37;font-size:10px;line-height:1.5}
+.campaign-blocker-list{margin:6px 0 0;padding-left:18px}
+.phase10-launch>.phase9-head{align-items:center}
+.phase11-package,.phase11-ownership{margin:14px 0;border-left:3px solid #315f48}
+.phase11-migration{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.phase11-validation{grid-column:1/-1;padding:10px 12px;border-left:3px solid #ac6343;background:#fbf5f1;color:#674234;font-size:11px;line-height:1.5}
+.phase11-validation.ready{border-color:#397b5b;background:#f1f7f2;color:#315f48}
+.phase11-exports{display:flex;gap:8px;flex-wrap:wrap}
+.phase11-review-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+.phase11-review-form label{display:grid;gap:4px;color:#5c6d66;font-size:10px}
+.phase11-review-form input,.phase11-review-form select{max-width:none;padding:7px;border:1px solid #cbd6ce;border-radius:3px;background:#fff;font:inherit;font-size:11px}
+.phase11-review-form button{align-self:end;justify-self:start}
+.phase11-proposal-form{margin-top:14px;padding-top:12px;border-top:1px solid #dfe6df}
+.phase11-disclaimer{margin:5px 0 0;color:#7a5948;font-size:10px;line-height:1.5}
+@media(max-width:1000px){.phase8-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.phase8-metric:nth-child(5n){border-right:1px solid #dfe6df}.phase8-metric:nth-child(3n){border-right:0}.phase9-workforce{grid-template-columns:repeat(3,minmax(0,1fr))}.phase9-workforce-item:nth-child(5n){border-right:1px solid #dfe6df}.phase9-workforce-item:nth-child(3n){border-right:0}}
+@media(max-width:900px){.phase10-domain-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.phase8-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.phase8-metric:nth-child(3n){border-right:1px solid #dfe6df}.phase8-metric:nth-child(2n){border-right:0}.phase8-details,.phase11-migration{grid-template-columns:1fr}.phase9-head{display:grid}.phase9-head label{max-width:180px}.phase9-blockers ul{columns:1}.phase9-workforce{grid-template-columns:repeat(2,minmax(0,1fr))}.phase9-workforce-item:nth-child(3n){border-right:1px solid #dfe6df}.phase9-workforce-item:nth-child(2n){border-right:0}.phase10-status-grid,.campaign-grid,.phase11-review-form,.phase10-domain-grid{grid-template-columns:1fr}.phase10-launch>.phase9-head{align-items:flex-start}}

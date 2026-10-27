@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#173c33">
+    <title>Executive Command Center | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/executive-command-center.css?v=20261026a">
+    <script src="/static/executive-command-center.js?v=20261026a" defer></script>
+</head>
+<body>
+    <div class="exec-shell">
+        <header class="exec-topbar">
+            <a class="brand" href="/dashboard" aria-label="Return to workspace">
+                <span class="brand-mark" aria-hidden="true">W</span>
+                <span class="brand-copy"><strong>workforce<span class="brand-dot">.</span></strong><small>OPERATING SYSTEM</small></span>
+            </a>
+            <div class="exec-top-actions"><a href="/dashboard">Workspace</a><a href="/approval-center">Approvals</a><a href="/profile">Profile</a></div>
+        </header>
+        <main>
+            <section class="exec-heading">
+                <div><p class="eyebrow">LIVE OPERATIONS · DATABASE-SOURCED</p><h1>Executive Command Center</h1><p id="companyContext">Loading verified company scope…</p></div>
+                <button id="refreshButton" type="button" aria-label="Refresh dashboard">Refresh</button>
+            </section>
+            <nav class="exec-tabs" aria-label="Executive dashboard view">
+                <button type="button" class="active" data-view="ceo" aria-pressed="true">CEO · Portfolio</button>
+                <button type="button" data-view="coo" aria-pressed="false">COO · Delivery</button>
+                <button type="button" data-view="cio" aria-pressed="false">CIO · Technology</button>
+            </nav>
+            <section id="dashboardStatus" class="exec-status" role="status" aria-live="polite">Loading live metrics…</section>
+            <section id="readinessScorecard" class="readiness-scorecard" aria-label="Operational platform readiness">
+                <div class="readiness-head"><div><p class="eyebrow">PHASE 9 · VERIFIED GATES</p><h2>Operational readiness</h2></div><strong id="readinessRecommendation">Loading…</strong></div>
+                <div id="readinessMetrics" class="readiness-metrics"></div>
+                <div id="readinessBlockers" class="readiness-blockers" aria-live="polite"></div>
+            </section>
+            <section id="dashboardSections" class="exec-sections" aria-live="polite"></section>
+            <footer>AI Workforce OS · Live, company-scoped aggregates · <span id="asOf">Awaiting data</span></footer>
+        </main>
+    </div>
+</body>
+</html>

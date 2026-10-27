@@ -19,13 +19,14 @@ class Requirement(Base):
     RequestedBy:Mapped[str]=mapped_column(String(200)); Priority:Mapped[str]=mapped_column(String(20))
     RiskLevel:Mapped[str]=mapped_column(String(20)); Status:Mapped[str]=mapped_column(String(30))
     CreatedAtUtc:Mapped[object]=mapped_column(DateTime); CreatedBy:Mapped[str]=mapped_column(String(200))
+    CreatedByUserID:Mapped[uuid.UUID|None]=mapped_column(UNIQUEIDENTIFIER,ForeignKey("AppUser.UserID"),nullable=True)
     ModifiedAtUtc:Mapped[object]=mapped_column(DateTime); ModifiedBy:Mapped[str]=mapped_column(String(200))
 
 class Agent(Base):
     __tablename__="Agent"
     AgentID:Mapped[uuid.UUID]=mapped_column(UNIQUEIDENTIFIER,primary_key=True)
     AgentName:Mapped[str]=mapped_column(String(200)); AgentType:Mapped[str]=mapped_column(String(30)); Status:Mapped[str]=mapped_column(String(30))
-    CompanyID:Mapped[uuid.UUID]=mapped_column(UNIQUEIDENTIFIER); Model:Mapped[str|None]=mapped_column(String(100)); ModelVersion:Mapped[str|None]=mapped_column(String(50)); PromptVersion:Mapped[str|None]=mapped_column(String(50))
+    CompanyID:Mapped[uuid.UUID|None]=mapped_column(UNIQUEIDENTIFIER,nullable=True); Model:Mapped[str|None]=mapped_column(String(100)); ModelVersion:Mapped[str|None]=mapped_column(String(50)); PromptVersion:Mapped[str|None]=mapped_column(String(50))
 
 class RequirementAssessment(Base):
     __tablename__="RequirementAssessment"
@@ -65,8 +66,13 @@ class AppUser(Base):
     DisplayName: Mapped[str] = mapped_column(String(200))
     Department: Mapped[str | None] = mapped_column(String(100))
     RoleID: Mapped[uuid.UUID | None] = mapped_column(UNIQUEIDENTIFIER, ForeignKey("Role.RoleID"))
+    ManagerUserID: Mapped[uuid.UUID | None] = mapped_column(UNIQUEIDENTIFIER, ForeignKey("AppUser.UserID"), nullable=True)
+    CompanyID: Mapped[uuid.UUID | None] = mapped_column(UNIQUEIDENTIFIER, ForeignKey("Company.CompanyID"), nullable=True)
+    DepartmentID: Mapped[uuid.UUID | None] = mapped_column(UNIQUEIDENTIFIER, ForeignKey("Department.DepartmentID"), nullable=True)
+    PositionID: Mapped[uuid.UUID | None] = mapped_column(UNIQUEIDENTIFIER, ForeignKey("Position.PositionID"), nullable=True)
     IsActive: Mapped[bool] = mapped_column(Boolean,default=True)
     Role = relationship("Role")
+    Manager = relationship("AppUser", remote_side=[UserID], foreign_keys=[ManagerUserID])
 
 class Approval(Base):
     __tablename__ = "Approval"
@@ -87,11 +93,26 @@ class Approval(Base):
         ForeignKey("AppUser.UserID")
     )
 
-    ApprovalLevel: Mapped[int] = mapped_column(Integer)
+    ApprovalStage: Mapped[str] = mapped_column(String(50))
     Status: Mapped[str] = mapped_column(String(30))
     Comments: Mapped[str | None] = mapped_column(Text)
     CreatedAtUtc: Mapped[object] = mapped_column(DateTime)
+    ApprovedAtUtc: Mapped[object | None] = mapped_column(DateTime)
     DecisionAtUtc: Mapped[object | None] = mapped_column(DateTime)
+
+class Notification(Base):
+    __tablename__ = "Notification"
+    NotificationID: Mapped[uuid.UUID] = mapped_column(UNIQUEIDENTIFIER, primary_key=True, default=uuid.uuid4)
+    UserID: Mapped[uuid.UUID] = mapped_column(UNIQUEIDENTIFIER, ForeignKey("AppUser.UserID"))
+    NotificationType: Mapped[str] = mapped_column(String(50))
+    Title: Mapped[str] = mapped_column(String(200))
+    Body: Mapped[str] = mapped_column(String(1000))
+    ResourceType: Mapped[str] = mapped_column(String(50))
+    ResourceID: Mapped[str] = mapped_column(String(100))
+    CorrelationID: Mapped[uuid.UUID] = mapped_column(UNIQUEIDENTIFIER)
+    IsRead: Mapped[bool] = mapped_column(Boolean, default=False)
+    CreatedAtUtc: Mapped[object] = mapped_column(DateTime)
+    ReadAtUtc: Mapped[object | None] = mapped_column(DateTime)
 
 class Project(Base):
     __tablename__ = "Project"

@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Company Platform</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <title>Company workspace | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/styles.css?v=20261022">
+    <script src="/static/mobile-nav.js?v=20261023a" defer></script>
 </head>
 
 <body>
@@ -17,23 +19,24 @@
 
         <div class="brand">
 
-            <div class="logo">AI</div>
+            <div class="logo">W</div>
 
             <div>
-                <h2>AI Company</h2>
-                <span>Enterprise Platform</span>
+                <h2>AI Workforce OS</h2>
+                <span>Company workspace</span>
             </div>
 
         </div>
 
-        <nav>
+        <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-expanded="false" aria-controls="legacyNavigation">Workspace menu</button>
+        <nav id="legacyNavigation" class="mobile-nav">
 
-            <a href="/" class="active">
-                🏠 Dashboard
+            <a href="/dashboard" class="active">
+                Overview
             </a>
 
-            <a href="/requirements">
-                📋 Requirements
+            <a href="/static/requirement-chat.html">
+                Requirements
             </a>
 
             <a href="/approvals">

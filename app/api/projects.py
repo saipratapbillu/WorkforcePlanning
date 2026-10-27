@@ -1,19 +1,28 @@
 # projects api blueprint
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from fastapi import Depends
-from app.security.dependencies import get_current_user
-from app.security.permissions import require_roles
 from app.db.session import get_db
-from app.models.entities import Project
+from app.security.dependencies import get_current_user
+from app.services.security_service import SecurityService
+from app.security.roles import has_role
+
 
 router = APIRouter(
     prefix="/projects",
-    tags=["Projects"]
+    tags=["Projects"],
 )
+
+
+def require_project_scope(user: dict):
+    if not has_role(user.get("role"), "BUSINESS_USER", "APPROVER", "EXECUTIVE", "WORKFORCE_MANAGER", "PLATFORM_OWNER"):
+        raise HTTPException(status_code=403, detail="Project access denied")
+    return user
+
 
 @router.get("")
 def projects(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
 ):
-    return db.query(Project).all()
+    require_project_scope(user)
+    return SecurityService(db).GetVisibleProjects(user)

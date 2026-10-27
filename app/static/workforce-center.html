@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#153b30">
+    <title>Workforce Planning | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/workforce-center.css?v=20261027i">
+    <script src="/static/workforce-center.js?v=20261027i" defer></script>
+    <script src="/static/mobile-nav.js?v=20261023a" defer></script>
+</head>
+<body>
+    <div class="wf-shell">
+        <aside class="wf-sidebar">
+            <a class="os-brand" href="/" aria-label="AI Workforce OS home"><span class="os-brand-mark">W</span><span class="os-brand-copy"><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a>
+            <div class="wf-nav-label">WORKSPACE</div>
+            <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-expanded="false" aria-controls="workforceNavigation">Workspace menu</button>
+            <nav id="workforceNavigation" class="mobile-nav" aria-label="Workspace navigation">
+                <a href="/dashboard"><span>◫</span>Overview</a>
+                <a href="/requests"><span>↗</span>My requests</a>
+                <a href="/approval-center"><span>✓</span>Approval center</a>
+                <a class="active" href="/workforce-center"><span>⊞</span>Workforce planning</a>
+                <a href="/static/requirement-chat.html"><span>＋</span>New request</a>
+                <a href="/profile"><span>◎</span>Profile</a>
+            </nav>
+            <div class="wf-sidebar-note"><strong>Governed staffing</strong><small>Recruiting and agent activation are separate decisions.</small></div>
+        </aside>
+        <main class="wf-main">
+            <header class="wf-topbar"><span>Company workspace <b>/</b> Workforce planning</span><span id="roleLabel" class="wf-role">Checking role…</span></header>
+            <section class="wf-content">
+                <div class="wf-heading"><div><p class="os-eyebrow">DELIVERY OPERATIONS</p><h1 class="os-heading">Workforce planning</h1><p>Review role profiles, approve recruiting requests, and assign only validated agents with available capacity.</p></div><button id="refreshButton" type="button" class="wf-refresh" aria-label="Refresh workforce data" title="Refresh">↻</button></div>
+                <div id="wfAlert" class="wf-alert" role="status" aria-live="polite" hidden></div>
+                <section class="wf-factory" aria-label="Agent factory planning">
+                    <div class="wf-section-head"><div><p class="os-eyebrow">AGENT FACTORY · PLANNING ONLY</p><h2>Workforce readiness</h2></div><span class="wf-registry-note">No lifecycle actions are performed</span></div>
+                    <div id="wfFactoryMetrics" class="wf-factory-metrics"><p class="wf-muted">Loading workforce evidence…</p></div>
+                    <form id="factoryBlueprintForm" class="wf-factory-form">
+                        <label>Requirement title<input id="factoryTitle" name="title" required minlength="3" maxlength="200" placeholder="Customer analytics portal"></label>
+                        <label>Requirement detail<textarea id="factoryDescription" name="description" required minlength="20" maxlength="12000" placeholder="Describe outcomes, constraints, users, and delivery scope."></textarea></label>
+                        <label>Technology changes<input id="factoryTechnologies" name="technology_changes" placeholder="Angular, .NET, Azure AI"></label>
+                        <button id="factoryGenerateButton" type="submit" class="wf-button">Generate workforce blueprint</button>
+                    </form>
+                    <div class="wf-code-package-actions">
+                        <label for="factoryBackendLanguage">Backend stack</label>
+                        <select id="factoryBackendLanguage" aria-label="Backend source language">
+                            <option value="python">Python</option>
+                            <option value="dotnet">.NET</option>
+                            <option value="node">Node.js</option>
+                        </select>
+                        <button id="factoryCodePackageButton" type="button" class="wf-button">Generate code package JSON</button>
+                        <button id="factoryDeliveryPlanButton" type="button" class="wf-button">Generate delivery simulation JSON</button>
+                        <button id="factoryAssignmentPlanButton" type="button" class="wf-button">Generate assignment recommendations JSON</button>
+                        <button id="factoryTestSimulationButton" type="button" class="wf-button">Generate test simulation JSON</button>
+                        <button id="factoryBuildPlanButton" type="button" class="wf-button">Generate build release plan JSON</button>
+                        <button id="factoryDeploymentPlanButton" type="button" class="wf-button">Generate deployment plan JSON</button>
+                        <button id="factoryHostingPlanButton" type="button" class="wf-button">Generate hosting plan JSON</button>
+                        <button id="factoryOperationsPlanButton" type="button" class="wf-button">Generate operations plan JSON</button>
+                    </div>
+                    <p class="wf-factory-notice">Blueprints, assignment recommendations, test/build/deployment/hosting/operations simulations, and source packages are planning artifacts. Candidate claims are unverified; readiness metrics are forecasts, not observed results. Nothing is written, assigned, compiled, built, published, connected to cloud services, or deployed by these previews.</p>
+                    <pre id="wfFactoryResult" class="wf-factory-result" aria-live="polite" hidden></pre>
+                </section>
+                <section id="reusePanel" class="wf-reuse" aria-label="Workforce reuse and upskilling" hidden>
+                    <div class="wf-section-head"><div><p class="os-eyebrow">PHASE 7 · WORKFORCE REUSE</p><h2>Reuse and upskill review</h2></div><span class="wf-muted">Manager decision required</span></div>
+                    <div id="reuseMetrics" class="wf-reuse-metrics"></div>
+                    <div id="reuseAssessments" class="wf-reuse-list"><p class="wf-muted">Loading reuse assessments…</p></div>
+                </section>
+                <section class="wf-org-status" aria-label="Organization bootstrap status"><div><p class="os-eyebrow">ORGANIZATION BOOTSTRAP</p><strong id="orgStatusTitle">Checking approved organization setup…</strong><span id="orgStatusDetail" class="wf-muted"></span></div><span id="orgStatusBadge" class="wf-status">Loading</span></section>
+                <div class="wf-grid">
+                    <section class="wf-queue" aria-label="Workforce requests">
+                        <div class="wf-section-head"><div><p class="os-eyebrow">STAFFING GAPS</p><h2>Role requests <span id="requestCount">0</span></h2></div><select id="statusFilter" aria-label="Filter role requests"><option value="">All states</option><option>PendingApproval</option><option>Recruiting</option><option>Provisioning</option><option>AgentActive</option><option>Filled</option><option>Rejected</option></select></div>
+                        <div id="requestList" class="wf-list"><p class="wf-muted">Loading requests…</p></div>
+                    </section>
+                    <section id="detailPanel" class="wf-detail" aria-live="polite"><div class="wf-empty"><span>⊞</span><h2>Select a role request</h2><p>Review the role profile and required decision before proceeding.</p></div></section>
+                </div>
+                <section class="wf-blockers" aria-label="Open activation blockers"><div class="wf-section-head"><div><p class="os-eyebrow">OWNER ESCALATIONS</p><h2>Open agent activation blockers <span id="blockerCount">0</span></h2></div></div><div id="blockerList" class="wf-blocker-list"><p class="wf-muted">Loading blockers…</p></div></section>
+                <section class="wf-catalog" aria-label="Workforce role profiles">
+                    <div class="wf-section-head"><div><p class="os-eyebrow">ROLE CATALOG</p><h2>Standard job profiles</h2></div><span id="profileCount" class="wf-muted">Loading…</span></div>
+                    <div id="profileList" class="wf-profile-list"></div>
+                </section>
+                <section class="wf-governance" aria-label="Governance gates and escalations">
+                    <div class="wf-section-head"><div><p class="os-eyebrow">TARGET CONTROL REGISTER</p><h2>Approval and quality gates</h2></div><span class="wf-registry-note">Configuration only · not runtime-enforced</span></div>
+                    <div id="gateList" class="wf-gate-list"><p class="wf-muted">Loading gate registry…</p></div>
+                    <div class="wf-section-head wf-escalation-head"><div><p class="os-eyebrow">ESCALATION PATH</p><h2>Operational escalation</h2></div></div>
+                    <div id="escalationList" class="wf-escalation-list"></div>
+                </section>
+                <footer class="wf-footer">Role profiles are original baseline templates, not copied employer postings. No agent is activated by approving recruiting.</footer>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

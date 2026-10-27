@@ -20,6 +20,10 @@ class AssessmentRequest(BaseModel):
     requested_by:str="HumanOwner"
     force_reassessment:bool=False
 
+class ApprovalDecisionRequest(BaseModel):
+    action:Literal["approve","reject","request_information"]
+    reason:str=Field(min_length=5,max_length=2000)
+
 class DepartmentRecommendation(BaseModel):
     department_name:str
     responsibility:str
@@ -90,4 +94,4 @@ class UserRegister(BaseModel):
 
     office_location: str | None = None
 
-    password: str
+    password: str = Field(min_length=12, max_length=128)

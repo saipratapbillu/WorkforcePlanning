@@ -120,6 +120,19 @@ REM ========================================================
 echo.
 echo [5/6] Validating AI Company environment...
 
+".venv\Scripts\python.exe" -c "from dotenv import load_dotenv; import os; load_dotenv(); key=os.getenv('JWT_SECRET_KEY',''); raise SystemExit(0 if len(key) >= 32 and not key.startswith('GENERATE_') else 1)"
+
+if errorlevel 1 (
+    echo.
+    echo ERROR: JWT_SECRET_KEY is missing or too short in .env.
+    echo Generate a random secret with:
+    echo python -c "import secrets; print(secrets.token_urlsafe(48))"
+    echo Add it to .env as JWT_SECRET_KEY=your-generated-value.
+    echo.
+    pause
+    exit /b 1
+)
+
 ".venv\Scripts\python.exe" -c "import fastapi, uvicorn, sqlalchemy, pyodbc, pydantic; print('Environment validation successful.')"
 
 if errorlevel 1 (
@@ -153,9 +166,6 @@ echo ========================================================
 echo.
 echo User Interface:
 echo http://127.0.0.1:8000/
-echo.
-echo API Documentation:
-echo http://127.0.0.1:8000/docs
 echo.
 echo Health Check:
 echo http://127.0.0.1:8000/health

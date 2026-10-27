@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#173c33">
+    <title>Organization & Workforce Admin | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/admin-control-center.css?v=20261026e">
+    <link rel="stylesheet" href="/static/admin-governance.css?v=20261026e">
+    <link rel="stylesheet" href="/static/admin-phase8.css?v=20261026d">
+    <script src="/static/admin-control-center.js?v=20261026f" defer></script>
+</head>
+<body>
+    <div class="admin-shell">
+        <header class="admin-topbar">
+            <a class="brand" href="/dashboard" aria-label="Return to workspace"><span class="brand-mark">W</span><span class="brand-copy"><strong>workforce<span class="brand-dot">.</span></strong><small>OPERATING SYSTEM</small></span></a>
+            <nav aria-label="Admin navigation"><a href="/dashboard">Workspace</a><a href="/workforce-center">Workforce planning</a><a href="/executive-command-center">Executive center</a></nav>
+        </header>
+        <main>
+            <section class="page-head"><div><p class="eyebrow">ADMINISTRATION · VERIFIED RECORDS</p><h1>Organization & workforce</h1><p>Resolve user organization scope and review agent readiness before assignment or execution.</p></div><button id="refreshButton" type="button">Refresh</button></section>
+            <div id="pageStatus" class="status" role="status" aria-live="polite">Loading current organization and workforce data…</div>
+            <nav class="tabs" aria-label="Admin tools">
+                <button class="active" type="button" data-tab="mappings" aria-pressed="true">Organization mappings</button>
+                <button type="button" data-tab="readiness" aria-pressed="false">Agent readiness</button>
+                <button type="button" data-tab="capacity" aria-pressed="false">Capacity & forecast</button>
+                <button type="button" data-tab="operations" aria-pressed="false">Operations readiness</button>
+            </nav>
+            <section id="mappingPanel" class="panel" aria-label="Organization mappings">
+                <div class="panel-head"><div><h2>Active user mappings</h2><p>Choose explicit Company, Department, and Position values from the active catalog. No legacy text is auto-mapped.</p></div><button id="reportButton" type="button" class="secondary">Mapping report</button></div>
+                <div id="mappingReport" class="report-strip" aria-live="polite"></div>
+                <div id="mappingTable" class="table-wrap"><p class="empty">Loading mappings…</p></div>
+            </section>
+            <section id="readinessPanel" class="panel" aria-label="Agent readiness" hidden>
+                <div class="panel-head"><div><h2>Agent readiness</h2><p>Required skills, active capacity, and certification gaps sourced from current workforce records.</p></div></div>
+                <section class="registry-section" aria-label="AI model governance">
+                    <div class="registry-head"><div><h3>Approved model registry</h3><p>Only approved catalog entries can be assigned to agents. New entries require an Owner/Super Admin decision.</p></div></div>
+                    <form id="modelProposalForm" class="model-proposal-form">
+                        <label>Provider<select id="proposalProvider" required><option>Azure OpenAI</option><option>OpenAI</option><option>Google</option><option>Google Vertex</option><option>Anthropic</option></select></label>
+                        <label>Model<input id="proposalModel" maxlength="120" placeholder="Model name" required></label>
+                        <label>Version<input id="proposalVersion" maxlength="80" placeholder="Approved enterprise version" required></label>
+                        <label>Reason<input id="proposalReason" maxlength="2000" placeholder="Approval basis" required></label>
+                        <label>Evidence<input id="proposalEvidence" maxlength="4000" placeholder="Policy, contract, security review reference" required></label>
+                        <button type="submit" class="action primary">Propose model</button>
+                    </form>
+                    <div id="modelCatalog" class="table-wrap"><p class="empty">Loading model catalog…</p></div>
+                </section>
+                <div id="skillSummary" class="skill-summary"></div>
+                <div id="agentList" class="agent-list"><p class="empty">Loading agents…</p></div>
+            </section>
+            <section id="capacityPanel" class="panel" aria-label="Agent capacity" hidden>
+                <div class="panel-head"><div><h2>Capacity & workload forecast</h2><p>Hour estimates use the documented 40-hour work-week basis and persisted task estimates only.</p></div></div>
+                <div id="capacityTable" class="table-wrap"><p class="empty">Loading capacity…</p></div>
+            </section>
+            <section id="operationsPanel" class="panel" aria-label="Operations readiness" hidden>
+                <div class="panel-head"><div><h2>Operational governance</h2><p>Readiness, remediation, model lifecycle, certification, and adapter configuration from recorded data.</p></div></div>
+                <section class="ops-section phase8-readiness" aria-label="Phase 8 readiness dashboard">
+                    <h3>Phase 8 readiness · read-only</h3>
+                    <div id="phase8Recommendation" class="report-strip">Loading ownership, runtime, and RLS evidence…</div>
+                    <div id="phase8Metrics" class="phase8-metrics"></div>
+                    <div id="phase8Details" class="phase8-details"></div>
+                    <button id="exportRlsPackage" type="button" class="action">Download RLS review package</button>
+                </section>
+                <section class="ops-section phase9-readiness" aria-label="Phase 9 operational workforce activation readiness">
+                    <div class="phase9-head"><div><h3>Phase 9 · operational workforce activation readiness</h3><p>Verified system records only. This dashboard does not activate agents, approve models, modify history, or enable RLS.</p></div><label>Executive view<select id="executiveReadinessView"><option>CEO</option><option>COO</option><option>CIO</option></select></label></div>
+                    <div id="phase9Recommendation" class="report-strip">Loading verified readiness evidence…</div>
+                    <div id="phase9Metrics" class="phase8-metrics"></div>
+                    <div id="phase9Workforce" class="phase9-workforce"></div>
+                    <div id="phase9Blockers" class="phase9-blockers"></div>
+                    <div id="executiveReadinessMetrics" class="phase9-executive-metrics"></div>
+                </section>
+                <section class="ops-section phase10-launch" aria-label="Phase 10 executive go or no-go center">
+                    <div class="phase9-head"><div><h3>Phase 10 · Operational activation launch center</h3><p>Consolidated launch decision from current ownership, adapter, model, certification, runtime, and RLS evidence.</p></div><button id="downloadActivationRunbook" type="button" class="action">Download activation runbook</button></div>
+                    <div id="phase10Recommendation" class="report-strip">Loading current launch evidence…</div>
+                    <div id="phase10Overall" class="phase10-overall"></div>
+                    <div id="phase10StatusCards" class="phase10-status-grid"></div>
+                    <div id="phase10Domains" class="phase10-domain-grid"></div>
+                    <div id="phase10Blockers" class="phase9-blockers"></div>
+                </section>
+                <section class="ops-section phase11-package" aria-label="Phase 11 deployment readiness package">
+                    <div class="phase9-head"><div><h3>Unified Governance & UAT Command Center</h3><p>Live authorization, blocker, evidence, and capability status plus a 21-area UAT traceability matrix. Mapped source coverage is not UAT pass evidence.</p></div><div class="phase11-exports"><button id="downloadAIGovernanceShadowReview" type="button" class="action">Download AI governance shadow review</button><button id="downloadUatReadiness" type="button" class="action">Download UAT readiness package</button><button id="downloadGovernanceCommandCenter" type="button" class="action">Download unified governance package</button></div></div>
+                    <div id="governanceCommandSummary" class="report-strip">Loading verified governance and UAT status…</div>
+                    <div id="aiGovernanceShadowSummary" class="report-strip">Loading evidence-bound governance shadow review…</div>
+                    <div class="phase9-head"><div><h4>Governance assurance & Level 3 readiness</h4><p>Deterministic replay, evidence quality, drift limitations, escalation analytics, and current autonomy level. No decisions are stored.</p></div><button id="downloadGovernanceAssurance" type="button" class="action">Download assurance report</button></div>
+                    <div id="governanceAssuranceSummary" class="report-strip">Loading assurance metrics…</div>
+                    <div class="phase11-exports"><button id="downloadPhase17Package" type="button" class="action">Download Phase 17 operations tracking</button><button id="downloadPhase16Package" type="button" class="action">Download Phase 16 authorization package</button><button id="downloadPhase15Package" type="button" class="action">Download Phase 15 evidence package</button><button id="downloadPhase14Package" type="button" class="action">Download Phase 14 execution plan</button><button id="downloadPhase13Package" type="button" class="action">Download Phase 13 pilot preparation</button><button id="downloadPhase12Package" type="button" class="action">Download Phase 12 activation package</button><button id="downloadPhase11Package" type="button" class="action">Download executive deployment package</button></div>
+                    <div id="migration24Validation" class="phase11-migration"><p class="empty">Validating migration file and dependencies…</p></div>
+                    <div id="modelOnboardingSummary" class="phase11-migration"></div>
+                    <form id="phase11ModelProposalForm" class="model-proposal-form phase11-proposal-form">
+                        <label>Provider<select id="phase11ProposalProvider" required><option>Azure OpenAI</option><option>OpenAI</option><option>Google Vertex</option><option>Anthropic</option></select></label>
+                        <label>Model<input id="phase11ProposalModel" maxlength="120" required placeholder="Exact provider model name"></label>
+                        <label>Version<input id="phase11ProposalVersion" maxlength="80" required placeholder="Immutable version"></label>
+                        <label>Business justification<input id="phase11ProposalReason" minlength="10" maxlength="2000" required></label>
+                        <label>Evidence reference<input id="phase11ProposalEvidence" minlength="20" maxlength="4000" required></label>
+                        <button type="submit" class="action primary">Submit pending model proposal</button>
+                    </form>
+                    <p class="phase11-disclaimer">Provider registry setup may occur with the proposal. The model remains Pending and requires a separate reviewer; this wizard has no approval action.</p>
+                    <div class="phase11-exports"><button id="downloadMigrationDryRun" type="button" class="action">Download migration validation report</button><button id="downloadModelOnboarding" type="button" class="action">Download model onboarding package</button><button id="downloadModelEvidence" type="button" class="action">Download approval evidence package</button></div>
+                </section>
+                <section class="ops-section phase11-ownership" aria-label="Ownership package review">
+                    <div class="phase9-head"><div><h3>Ownership approval review</h3><p>Records a human package decision in AuditLog only; it never applies ownership SQL.</p></div><div class="phase11-exports"><button id="downloadRollbackPackage" type="button" class="action">Download rollback package</button><button id="downloadOwnershipAudit" type="button" class="action">Download audit package</button></div></div>
+                    <form id="ownershipReviewForm" class="phase11-review-form">
+                        <label>Review decision<select id="ownershipReviewDecision"><option value="NeedsReview">Needs review</option><option value="ApprovedForManualChange">Reviewed for separately approved manual change</option><option value="Rejected">Reject package</option></select></label>
+                        <label>Change ticket<input id="ownershipReviewTicket" minlength="3" maxlength="120" required></label>
+                        <label>Rationale<input id="ownershipReviewReason" minlength="10" maxlength="2000" required></label>
+                        <label>Evidence reference<input id="ownershipReviewEvidence" minlength="20" maxlength="4000" required></label>
+                        <button type="submit" class="action primary">Record review in audit</button>
+                    </form>
+                </section>
+                <section class="ops-section" aria-label="Workforce certification campaign">
+                    <div class="phase9-head"><div><h3>Workforce certification campaign</h3><p>Read-only onboarding evidence for the five requested workforce roles. Missing role profiles are shown as blockers, not generated.</p></div></div>
+                    <div id="certificationCampaign" class="campaign-grid"><p class="empty">Loading campaign evidence…</p></div>
+                </section>
+                <section class="ops-section" aria-label="Adapter deployment validation wizard">
+                    <div class="phase9-head"><div><h3>Adapter deployment validation</h3><p>Verify secret references without provider calls. Live connectivity checks remain a separate explicit action.</p></div></div>
+                    <div id="adapterDeploymentWizard"><p class="empty">Loading adapter deployment package…</p></div>
+                </section>
+                <div class="ops-grid">
+                    <section class="ops-section"><h3>Historical ownership remediation</h3><p>Exact legacy GUID matches only. Generated scripts are review artifacts and are never applied here.</p><div id="ownershipSummary" class="report-strip"></div><div id="ownershipRows" class="table-wrap"><p class="empty">Loading ownership report…</p></div><button id="exportOwnershipPackage" type="button" class="action">Download approval package</button><button id="exportOwnershipDocument" type="button" class="action">Download approval document</button><label class="script-label">Generated remediation SQL<textarea id="ownershipScript" readonly rows="8"></textarea></label><button id="copyOwnershipScript" type="button" class="action">Copy remediation SQL</button><label class="script-label">Generated rollback SQL<textarea id="ownershipRollbackScript" readonly rows="8"></textarea></label><button id="copyOwnershipRollbackScript" type="button" class="action">Copy rollback SQL</button></section>
+                    <section class="ops-section"><h3>Execution adapters</h3><p>Azure OpenAI, OpenAI, Google Vertex AI, and Anthropic configurations are not connectivity evidence. Vault resolution and authenticated provider probes are unavailable until explicitly configured.</p><div id="adapterConfigs"><p class="empty">Loading adapters…</p></div><h4>Adapter audit history</h4><div id="adapterAudit" class="table-wrap"><p class="empty">Loading audit history…</p></div></section>
+                    <section class="ops-section"><h3>Model lifecycle & approval aging</h3><div id="modelLifecycle"><p class="empty">Loading model lifecycle…</p></div></section>
+                    <section class="ops-section"><h3>Certification dashboard</h3><div id="certificationDashboard"><p class="empty">Loading certifications…</p></div></section>
+                    <section class="ops-section"><h3>Operational readiness scorecard</h3><div id="operationalScorecard"><p class="empty">Loading scorecard…</p></div></section>
+                </div>
+            </section>
+            <footer>Administrative writes are audited. Activation remains blocked until provider/model configuration and required evaluations pass. No execution is simulated.</footer>
+        </main>
+    </div>
+</body>
+</html>

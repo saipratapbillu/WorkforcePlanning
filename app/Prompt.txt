@@ -455,3 +455,76 @@ When asked to build any feature, provide:
 Do not simplify the solution.
 
 Treat AI Workforce OS™ as an enterprise-grade AI Services Company Platform.
+
+=========================================================
+CURRENT DEVELOPMENT CONTINUATION (2026-10-22)
+=========================================================
+
+Continue from the existing FastAPI + SQLAlchemy + SQL Server + static HTML/CSS/JavaScript repository. Do not replace the app or redesign unrelated modules. Before implementing a module, inspect its existing route, schema, service, repository, SQL migration, and UI. Keep changes local to the owning boundary and update this prompt, the step-by-step guide, the progress tracker, and a relevant module design document whenever behavior changes.
+
+Current development status:
+
+- Requirement Management: guided chat-style intake UI is available at `/static/requirement-chat.html` and linked from the landing page.
+- Requirement Workflow: the chat gathers a business problem, expected outcome, users/stakeholders, systems/data, constraints/security, and timing/dependencies. It shows a reviewable brief and saves through the existing `POST /requirements` contract.
+- Clarifying questions: current follow-ups are scripted keyword rules for integrations and sensitive/personal data. This is not a live conversational LLM.
+- AI CEO Assessment: the existing provider is deterministic. High/Critical priority submissions automatically call the existing assessment route after saving. Assessment failure must not lose the saved requirement; offer retry against the same requirement ID.
+- HR onboarding: `app/services/assessment_provider.py` contains a deterministic HR onboarding demo branch. It flags employee privacy/provisioning risks and requires human approval. It is not a live LLM; never treat its output as validated legal, HR, or security advice.
+- AI CTO Assessment, AI CFO Assessment, AI COO Assessment: separate governed assessment flows remain future deliverables.
+- Approval Framework: the single-stage MVP is implemented. A `PendingApproval` status alone is not proof of an assigned approval; tracking exposes missing records and reconciliation must preserve pending state, require persisted assessment evidence, and create only a pending approval.
+- Approval MVP: assessments requiring human review create a pending CEO_REVIEW approval and in-app notifications for active Owners/Super Admins. The authenticated Approval Center requires a decision reason and permits the assigned approver or Owner/Super Admin to approve, reject, or request information. Only the last approved gate creates a Planned project and seven Planned tasks; rejection/information request blocks delivery. This is not a configurable enterprise workflow engine.
+- HR synthetic demo update (2026-10-23): an authorized Super Admin approved the planning request with a recorded reason. One Planned project and seven Planned tasks exist. This is not permission to process real employee data, provision accounts, message employees, or deploy.
+- Legacy orphan reconciliation (2026-10-23): the FSQA request had persisted assessment evidence requiring human review but no Approval row. It now has one assigned Pending approval; its status remains PendingApproval and no project was created.
+- Agent lifecycle update (2026-10-23): `sql/09_agent_provisioning_lifecycle.sql` links workforce requests to provisioned Agents and adds `Provisioning`/`AgentActive` states. Recruiting authorization automatically creates a non-active Agent record and Pending skill links. All six authorized HR roles now have records in `Provisioning`; no project agent or task is assigned. `sql/11_agent_activation_governance.sql` adds durable activation blockers. Activation requires an approved provider/model/version, passed Capability/Safety/Security/Governance evaluations, and a reasoned Owner/Super Admin action. Failures persist blockers, audit evidence, and Owner notifications; current HR project has four open blocker categories for each role agent. After activation, planning automatically assigns qualified tasks respecting capacity/dependencies. Do not bypass activation or claim execution: no agent code execution runtime exists yet.
+- Workforce Center: authenticated `/workforce-center`, `/workforce/roles`, `/workforce/requests`, provision/activate/fill endpoints, project planning, and task lifecycle controls. After gated activation, planning automatically matches qualified capacity and assigns eligible tasks while checking the Delivery Lead and prerequisites. The repository has no model invocation or isolated code execution runtime, so the app cannot yet autonomously write/test code or mark a task completed. Do not simulate completion.
+- Target operating model update (2026-10-23): `sql/08_governed_organization_and_quality_gates.sql` adds role reporting metadata, executive/department/specialist role charters, approval/quality gate registry, and escalation policy registry. `/workforce/governance-catalog` explicitly reports `runtime_enforced=false`. Do not describe CTO/CFO/COO orchestration, seven-stage QA, production gates, or escalation timers as active until runtime services and negative tests enforce them.
+- Organization bootstrap update (2026-10-23): migration `sql/10_organization_bootstrap.sql` adds the missing department-head roles, canonical `Agent.WorkforceRoleCode`, and unique company bootstrap ledger. The final Owner/Super Admin approval invokes idempotent organization generation: missing departments/positions are created, existing agents reused, and missing role Agent rows created in non-active `Provisioning` with Pending skills and reporting links. Existing active AI CEO is preserved. The approved HR demo backfill completed: 56 role profiles, 49 new Agent records, 7 reused, 55 role agents Provisioning and only the pre-existing AI CEO Active. This did not activate agents or execute tasks.
+- HR pilot gate: do not use real employee records until HRIS, identity provider, jurisdiction, retention, pilot owner/cohort, employee-level access, and communications decisions are signed off and implemented; see `docs/HR_Onboarding_Workflow.md`.
+- Request tracking: authenticated `/requests` page and `GET /requirements/{id}/tracking` summarize persisted requirement, assessment, approval, project/task plan, workforce requisitions, and audit data. Show absent approvals/projects explicitly; do not invent workflow stages or progress.
+- Project creation and execution: the current workflow creates Planned project/task records after required approvals are satisfied; it does not execute tasks, provision accounts, or deploy. Keep real execution behind separate authorization gates.
+
+Conversational intake behavior requirements:
+
+1. Ask one business question at a time in plain language. Collect problem, measurable outcome, affected users, systems/data, constraints/security, and desired timing.
+2. Generate targeted follow-up questions when sensitive data, regulated data, integrations, data writes, or other material risks are mentioned. Explain uncertainty and allow “unknown” without fabricating an answer.
+3. Keep a live labeled brief and let the user review and add context before saving. Draft answers stay in the browser until explicit submission.
+4. Do not request or store secrets, credentials, payment card data, or unnecessary personal data. Ask for data categories and controls, not real records.
+5. Use the authenticated server-side actor and tenant as the source of truth. Do not trust browser-supplied `requested_by`, company, role, or approval authority. Current requirement routes derive the actor from the authenticated session; complete tenant ownership and cross-tenant denial tests before production.
+6. High/Critical priority triggers assessment, not approval. Priority and risk are distinct. Assessment output is advisory and cannot authorize budget, agent access, project activation, or deployment.
+7. Persist structured conversation/clarification evidence and correlation IDs in a governed versioned design before production; define retention and access policy. The current MVP stores the assembled requirement description only after submission.
+8. A production AI CEO provider must return schema-validated structured output with evidence references, assumptions, confidence, risks, strategic fit, recommendation, and human-review requirement. Version prompts/models, evaluate outputs, and audit failures. Never expose hidden reasoning or claim unsupported facts.
+
+AI CEO intake system prompt contract for a future governed provider:
+
+“You are the AI CEO's business-requirement discovery assistant in a governed enterprise workflow. Help the requester express the business problem, desired measurable outcome, affected stakeholders, systems and data, constraints, urgency, and dependencies. Ask one concise, relevant clarification at a time when information is missing or risk is indicated. Separate requester-provided facts from assumptions. If the user does not know, record an open question instead of guessing. Do not request secrets or actual sensitive records. Do not make architecture, budget, approval, staffing, or delivery commitments. Do not execute tools or change records. When enough information exists, return a concise structured brief, strategic/business impact assessment, priority recommendation, risks, evidence references, confidence, and whether human review is required. Assessment is advisory; only authorized human workflow decisions can approve work.”
+
+HR onboarding CEO assessment prompt addendum:
+
+“For employee onboarding proposals, assess business readiness and measurable first-day completion outcomes. Minimize employee data to work identity, department, manager, start date, and checklist state unless an approved privacy assessment justifies more. Explicitly identify HRIS and identity-provider system-of-record decisions, jurisdiction and retention requirements, manager scope, HR/IT/Security accountabilities, notification consent, and provisioning authorization gates as evidence or open questions. Flag unauthorized access provisioning as critical risk. Do not create identities, message employees, decide employment, or claim labor/privacy compliance. Recommend HR, Security, Privacy/Legal, and Owner review when corresponding decisions or high-risk controls remain open.”
+
+Recommended next implementation sequence:
+
+1. Harden authentication, password hashing, JWT configuration, Owner bootstrap, RBAC/ABAC, and company isolation.
+2. Reconcile SQLAlchemy models and SQL Server migrations; make requirement changes and audit events attributable to authenticated actors.
+3. Implement versioned CEO/CTO/CFO/COO assessment contracts and a provider interface, keeping current deterministic behavior available for local development.
+4. Implement approval assignment, Owner authority for governance/high-risk decisions, decision reasons, SLA/escalation, audit history, and valid state transitions.
+5. Invoke Project Factory idempotently only after all policy-required approvals; generate milestones/tasks and proposed assignments with review gates.
+6. Connect dashboard metrics to company-scoped APIs, test authorization/tenant isolation, and remove sample/preview labels only when data and enforcement are live.
+
+=========================================================
+SECURITY CONTINUATION RULES (2026-10-22)
+=========================================================
+
+- Treat source code, project information, requirements, assessments, users, approvals, agents, and operational metrics as private by default.
+- Public routes are limited to marketing, login, registration, liveness, and allowlisted presentation assets. Private pages and every business-data API require server-side authentication and authorization.
+- The frontend cannot conceal HTML, CSS, or JavaScript delivered to a browser. Never put credentials, signing keys, server implementation, or actual customer/project data in public client assets. Protect project data at backend routes and database queries, not by hiding UI elements or masking DOM text.
+- Keep session material in an HttpOnly, SameSite cookie; do not move JWTs back into localStorage or URLs. Validate signature, issuer, audience, expiry, active user, and current database role on every request.
+- Ordinary users may access only their own requirements. Cross-user project, approval, agent-registry, and aggregate data is Owner/Super Admin-only until company membership and tenant scoping have been implemented and tested.
+- Request visibility policy: USER sees own requests; MANAGER sees own plus explicitly assigned direct reports via `ManagerUserID`; ADMIN sees all company request flows but does not automatically gain Owner-only approval authority; OWNER/SUPER_ADMIN have company-wide visibility and designated governance authority.
+- Every pending approval must notify its assigned approver. Critical/overdue approval notifications also go to Owner/Super Admin oversight recipients. Do not broadcast sensitive requirement content to unrelated users.
+- When a valid approval is recorded, the workflow engine should automatically enqueue the next eligible workflow stage exactly once, only after every required approval passes and no rejection, information request, security hold, or policy block remains. Project/task generation must be idempotent and audited. Never claim this automation exists until implemented and tested.
+- Voice assistant and voice approval are future capabilities. Voice alone must never authorize consequential actions; require authenticated identity, step-up MFA, read-back confirmation of the exact decision, replay/deepfake controls, audit evidence, privacy retention rules, and a non-voice alternative.
+- Voice capabilities remain roadmap-only. Do not add voice-based approval until the identity, consent, transaction read-back, replay/deepfake threat model, audit evidence, retention policy, and manual fallback gates are implemented and independently tested.
+- API schemas/docs must remain disabled publicly. Health responses must not reveal database names, server names, secrets, filesystem paths, environment values, or stack traces.
+- Never log passwords, tokens, cookies, secrets, requirement bodies, or assessment payloads unnecessarily. Secrets are environment/secret-store configuration only and never committed.
+- Continue with defense in depth: password hashing, same-origin/CSRF protections, login rate limiting, MFA, immutable audit events, tenant-isolation tests, and a controlled Owner bootstrap. A UI role badge is not authorization.
+- In every future feature, document exactly which routes are public, which require login, the role/tenant rules, data returned, audit trail, and tests proving anonymous and unauthorized requests are denied.

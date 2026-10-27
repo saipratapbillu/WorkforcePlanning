@@ -189,24 +189,5 @@ class CEOOrchestrator:
 
         if not self.project_factory:
             return
-
-        project = self.project_factory.create_project(
-            db,
-            requirement
-        )
-
-        tasks = self.project_factory.generate_tasks(
-            db,
-            project,
-            assessment
-        )
-
-        if self.workforce_manager:
-
-            self.workforce_manager.allocate_workforce(
-                db,
-                project,
-                assessment.required_skills
-            )
-
-        return project
+        project_id = self.project_factory.create_project(db, requirement, assessment)
+        return project_id

@@ -1,162 +1,65 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Workforce OS™ Dashboard</title>
-
-    <link rel="stylesheet" href="/static/dashboard.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#153b30">
+    <title>Workspace | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/dashboard.css?v=20261023c">
+    <link rel="stylesheet" href="/static/personal-dashboard.css?v=20261023a">
+    <script src="/static/dashboard.js?v=20261023c" defer></script>
+    <script src="/static/mobile-nav.js?v=20261023a" defer></script>
 </head>
-
 <body>
-
-    <div id="app">
-
-        <aside class="sidebar">
-
-            <div class="brand">
-                <div class="logo">AI</div>
-                <div>
-                    <h2>AI Workforce OS</h2>
-                    <span>Executive Command Center</span>
-                </div>
-            </div>
-
-            <nav>
-
-                <a href="/dashboard" class="active">Dashboard</a>
-
-                <a href="/">Requirements</a>
-
-                <a href="/projects">Projects</a>
-
-                <a href="/approvals">Approvals</a>
-
-                <a href="/profile">Profile</a>
-
+    <div id="app" class="workspace-shell">
+        <aside class="workspace-sidebar">
+            <a class="os-brand" href="/" aria-label="AI Workforce OS home"><span class="os-brand-mark">W</span><span class="os-brand-copy"><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a>
+            <div class="workspace-label">WORKSPACE</div>
+            <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-expanded="false" aria-controls="workspaceNavigation">Workspace menu</button>
+            <nav id="workspaceNavigation" class="mobile-nav" aria-label="Main navigation">
+                <a class="active" href="/dashboard"><span>◫</span>Overview</a>
+                <a href="/requests"><span>↗</span>My requests</a>
+                <a href="/static/requirement-chat.html"><span>▤</span>Requirements</a>
+                <a href="/approval-center"><span>✓</span>Approval center</a>
+                <a href="/workforce-center" data-allowed-roles="ADMIN,OWNER,SUPER_ADMIN"><span>⊞</span>Workforce planning</a>
+                <a href="/projects" id="projectsNavigation" data-allowed-roles="OWNER,SUPER_ADMIN"><span>▧</span>Projects</a>
+                <a href="/executive-command-center" data-allowed-roles="OWNER,SUPER_ADMIN"><span>⌘</span>Executive command center</a>
+                <a href="/admin-control-center" data-allowed-roles="OWNER,SUPER_ADMIN"><span>⚙</span>Organization & workforce admin</a>
             </nav>
-
-            <button class="logout-btn" onclick="logout()">
-                Logout
-            </button>
-
+            <div class="sidebar-bottom"><div class="sidebar-note"><span class="status-dot"></span><span><strong>Governed delivery</strong><small>Human decisions stay in control.</small></span></div><button class="logout-btn" type="button" onclick="logout()">Sign out <span aria-hidden="true">↗</span></button></div>
         </aside>
-
-        <main class="content">
-
-            <header class="topbar">
-
-                <div>
-
-                    <h1>
-                        Welcome,
-                        <span id="userName"></span>
-                    </h1>
-
-                    <p>
-                        AI Workforce Operating System
-                    </p>
-
-                </div>
-
-                <div class="role-badge" id="roleBadge">
-                </div>
-
-            </header>
-
-            <section class="kpi-grid">
-
-                <div class="kpi-card">
-                    <h3>Requirements</h3>
-                    <span id="requirementsCount">0</span>
-                </div>
-
-                <div class="kpi-card">
-                    <h3>Assessments</h3>
-                    <span id="assessmentsCount">0</span>
-                </div>
-
-                <div class="kpi-card">
-                    <h3>Projects</h3>
-                    <span id="projectsCount">0</span>
-                </div>
-
-                <div class="kpi-card">
-                    <h3>Approvals</h3>
-                    <span id="approvalsCount">0</span>
-                </div>
-
-            </section>
-
-            <section class="panel">
-
-                <h2>AI Workforce Overview</h2>
-
-                <div class="workforce-grid">
-
-                    <div class="agent-card">
-                        🤖 AI CEO
+        <main class="workspace-main">
+            <header class="workspace-topbar"><div><span class="breadcrumb-label">Company workspace</span><span class="breadcrumb-divider">/</span><span class="breadcrumb-current">Overview</span></div><a class="user-chip" href="/profile"><span class="avatar" id="userAvatar">U</span><span><strong id="userName">Workspace user</strong><small id="roleBadge">USER</small></span><span class="chip-arrow">↗</span></a></header>
+            <div class="workspace-content">
+                <section class="dashboard-heading"><div><p class="os-eyebrow">YOUR OPERATING PICTURE</p><h1 class="os-heading">Company workspace</h1><p>Track requirements as they move toward governed delivery.</p></div><a class="os-button" href="/static/requirement-chat.html">New requirement <span>→</span></a></section>
+                <p id="dashboardError" class="dashboard-error" role="status" aria-live="polite" hidden></p>
+                <section class="kpi-grid" aria-label="Workspace overview metrics">
+                    <article class="kpi-card"><div><span>Requirements</span><i class="kpi-symbol symbol-green">▤</i></div><strong id="requirementsCount">0</strong><small>Submitted to the workflow</small></article>
+                    <article class="kpi-card"><div><span>Assessments</span><i class="kpi-symbol symbol-blue">◎</i></div><strong id="assessmentsCount">0</strong><small>Assessment records</small></article>
+                    <article class="kpi-card"><div><span>Projects</span><i class="kpi-symbol symbol-amber">▧</i></div><strong id="projectsCount">0</strong><small>Project records</small></article>
+                    <article class="kpi-card"><div><span>Approvals</span><i class="kpi-symbol symbol-coral">✓</i></div><strong id="approvalsCount">0</strong><small>Approval records</small></article>
+                </section>
+                <section class="workspace-panel personal-data-panel" aria-label="My delivery records">
+                    <div class="panel-heading"><div><p class="os-eyebrow">MY DELIVERY</p><h2 class="os-heading">My records</h2></div></div>
+                    <div class="personal-data-grid">
+                        <section class="personal-data-section" id="myRequirements"><h3>My requirements</h3><div id="myRequirementsList" class="personal-data-list"></div></section>
+                        <section class="personal-data-section" id="myProjects"><h3>My projects</h3><div id="myProjectsList" class="personal-data-list"></div></section>
+                        <section class="personal-data-section" id="myTasks"><h3>My tasks</h3><div id="myTasksList" class="personal-data-list"></div></section>
+                        <section class="personal-data-section" id="myApprovals"><h3>My approvals</h3><div id="myApprovalsList" class="personal-data-list"></div></section>
                     </div>
-
-                    <div class="agent-card">
-                        💰 AI CFO
-                    </div>
-
-                    <div class="agent-card">
-                        ⚙ AI COO
-                    </div>
-
-                    <div class="agent-card">
-                        💻 AI CTO
-                    </div>
-
-                    <div class="agent-card">
-                        👥 AI HR
-                    </div>
-
-                    <div class="agent-card">
-                        🔒 AI CISO
-                    </div>
-
-                </div>
-
-            </section>
-
-            <section class="panel">
-
-                <h2>Recent Activities</h2>
-
-                <table>
-
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Activity</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="activityTable">
-
-                        <tr>
-                            <td>Today</td>
-                            <td>Dashboard Initialized</td>
-                            <td>Success</td>
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </section>
-
+                </section>
+                <section class="workspace-panel notification-panel" aria-label="Notifications">
+                    <div class="panel-heading"><div><p class="os-eyebrow">INBOX</p><h2 class="os-heading">Notifications</h2></div><span id="unreadCount" class="preview-status">0 unread</span></div>
+                    <div id="notificationList" class="notification-list"><p class="notification-empty">Loading notifications…</p></div>
+                </section>
+                <section class="workspace-grid">
+                    <article class="workspace-panel workflow-panel"><div class="panel-heading"><div><p class="os-eyebrow">DELIVERY LIFECYCLE</p><h2 class="os-heading">From need to outcome</h2></div><span class="current-state"><i></i>Workflow overview</span></div><div class="workflow-line"><div class="workflow-step"><span class="workflow-index">01</span><strong>Requirement</strong><small>Business need</small></div><i></i><div class="workflow-step"><span class="workflow-index">02</span><strong>Assessment</strong><small>Executive agents</small></div><i></i><div class="workflow-step"><span class="workflow-index">03</span><strong>Approval</strong><small>Human decision</small></div><i></i><div class="workflow-step"><span class="workflow-index">04</span><strong>Delivery</strong><small>Project teams</small></div></div><div class="panel-action"><span>Start by explaining what your business needs.</span><a href="/static/requirement-chat.html">Begin intake <b>→</b></a></div></article>
+                    <article class="workspace-panel leadership-panel"><div class="panel-heading"><div><p class="os-eyebrow">AI EXECUTIVE OFFICE</p><h2 class="os-heading">Leadership roles</h2></div><span class="preview-status">Role overview</span></div><div class="leader-list"><div class="leader-row"><span class="leader-avatar ceo">CE</span><span><strong>AI CEO</strong><small>Business impact &amp; strategic fit</small></span><i>01</i></div><div class="leader-row"><span class="leader-avatar cto">CT</span><span><strong>AI CTO</strong><small>Architecture &amp; technology</small></span><i>02</i></div><div class="leader-row"><span class="leader-avatar cfo">CF</span><span><strong>AI CFO</strong><small>Cost &amp; financial assessment</small></span><i>03</i></div><div class="leader-row"><span class="leader-avatar coo">CO</span><span><strong>AI COO</strong><small>Delivery &amp; capacity planning</small></span><i>04</i></div></div><p class="advisory-note">Agent outputs are advisory. Authorized people own consequential decisions.</p></article>
+                </section>
+                <footer class="workspace-footer"><span>AI WORKFORCE OS <i>·</i> COMPANY WORKSPACE</span><span>Counts reflect the connected dashboard API</span></footer>
+            </div>
         </main>
-
     </div>
-
-    <script src="/static/dashboard.js"></script>
-
 </body>
-
 </html>

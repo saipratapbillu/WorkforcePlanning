@@ -1,76 +1,54 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <title>Login | AI Workforce OS</title>
-
-    <link rel="stylesheet" href="/static/auth.css" />
-  </head>
-
-  <body>
-    <div class="bg-animation"></div>
-
-    <div class="auth-wrapper">
-      <div class="auth-card">
-        <div class="logo">AI</div>
-
-        <h1>Welcome Back</h1>
-
-        <p class="subtitle">Your Workforce Is Waiting</p>
-
-        <form id="loginForm">
-          <label for="email">Email</label>
-
-          <input id="email" type="email" autocomplete="email" required />
-
-          <label for="password">Password</label>
-
-          <input id="password" type="password" autocomplete="current-password" required />
-
-          <button class="btn" type="submit">Launch My Company</button>
-        </form>
-
-        <div class="link">
-          No account?
-
-          <a href="/register"> Create one </a>
-        </div>
-      </div>
-    </div>
-
-    <script src="/static/auth.js"></script>
-
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f6f2">
+    <title>Sign in | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/auth.css?v=20261022">
+</head>
+<body>
+    <header class="auth-header"><a class="os-brand" href="/" aria-label="AI Workforce OS home"><span class="os-brand-mark">W</span><span class="os-brand-copy"><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a><a href="/">Return to company overview <span aria-hidden="true">↗</span></a></header>
+    <main class="auth-shell">
+        <section class="auth-story"><span class="story-index">AI WORKFORCE OS <i>·</i> COMPANY OPERATIONS</span><div class="story-copy"><p class="os-eyebrow">YOUR DELIVERY SYSTEM</p><h1>One workforce.<br><em>Clear accountability.</em></h1><p>Bring business requirements, AI executive assessments, human approvals, and delivery teams into one governed operating flow.</p><div class="story-agents"><span>CEO · Strategy</span><span>CTO · Architecture</span><span>CFO · Finance</span><span>COO · Delivery</span></div></div><div class="story-foot"><span>HUMAN-LED</span><span>AI-COORDINATED</span><span>GOVERNED BY DESIGN</span></div></section>
+        <section class="auth-form-wrap"><div class="auth-card"><p class="auth-step">ACCOUNT ACCESS <span>01 / 01</span></p><h2>Welcome back.</h2><p class="subtitle">Sign in to continue to your company workspace.</p>
+            <form id="loginForm">
+                <label for="email">Work email</label><input id="email" name="email" type="email" autocomplete="email" placeholder="name@company.com" required>
+                <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+                <button class="btn" type="submit"><span>Sign in to workspace</span><span aria-hidden="true">→</span></button>
+                <p id="authMessage" class="auth-message" role="status" aria-live="polite"></p>
+            </form>
+            <div class="link">New to the workspace? <a href="/register">Create an account</a></div>
+            <div class="auth-assurance"><span class="assurance-mark">◇</span>Authentication is handled by the AI Workforce OS service.</div>
+        </div></section>
+    </main>
     <script>
-      document
-        .getElementById("loginForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          const body = {
-            email: email.value,
-
-            password: password.value,
-          };
-
-          const response = await fetch("/auth/login", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(body),
-          });
-
-          const result = await response.json();
-
-          if (response.ok) {
-            localStorage.setItem("token", result.access_token);
-
-            localStorage.setItem("userName", result.display_name);
-
-            window.location = "/dashboard";
-          } else {
-            alert(result.detail);
-          }
+        document.getElementById("loginForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const button = event.currentTarget.querySelector("button[type=submit]");
+            const message = document.getElementById("authMessage");
+            const originalLabel = button.querySelector("span:first-child").textContent;
+            button.disabled = true;
+            button.querySelector("span:first-child").textContent = "Signing in…";
+            message.textContent = "";
+            try {
+                const response = await fetch("/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: document.getElementById("email").value, password: document.getElementById("password").value }),
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result.detail || "Sign in failed. Check your details and try again.");
+                localStorage.setItem("userName", result.display_name || "");
+                window.location = "/dashboard";
+            } catch (error) {
+                message.textContent = error.message || "Unable to reach the sign-in service.";
+            } finally {
+                button.disabled = false;
+                button.querySelector("span:first-child").textContent = originalLabel;
+            }
         });
     </script>
-  </body>
+</body>
 </html>

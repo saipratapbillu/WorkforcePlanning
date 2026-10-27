@@ -1,167 +1,73 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-
-<title>Register</title>
-
-<link rel="stylesheet"
-href="/static/auth.css">
-
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f6f2">
+    <title>Create account | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/auth.css?v=20261022">
 </head>
-
 <body>
-
-<div class="bg-animation"></div>
-
-<div class="auth-wrapper">
-
-<div class="auth-card">
-
-<div class="logo">AI</div>
-
-<h1>Create Account</h1>
-
-<p class="subtitle">
-Build Your Digital Workforce
-</p>
-
-<form id="registerForm">
-
-<div class="grid">
-
-<div>
-
-<label>First Name</label>
-<input id="firstName" required>
-
-</div>
-
-<div>
-
-<label>Last Name</label>
-<input id="lastName" required>
-
-</div>
-
-</div>
-
-<label>Email</label>
-<input id="email" type="email" required>
-
-<label>Department</label>
-<input id="department">
-
-<label>Position</label>
-<input id="position">
-
-<label>Location</label>
-<input id="location">
-
-<label>Password</label>
-<input id="password"
-type="password"
-required>
-
-<button
-type="submit"
-class="btn">
-
-Create My AI Company
-
-</button>
-
-</form>
-
-<div class="link">
-
-Already registered?
-
-<a href="/login">
-
-Login
-
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-<script src="/static/auth.js"></script>
-
-<script>
-
-document
-.getElementById("registerForm")
-.addEventListener(
-"submit",
-async e=>{
-
-e.preventDefault()
-
-const response =
-await fetch(
-"/users/register",
-{
-method:"POST",
-
-headers:{
-"Content-Type":
-"application/json"
-},
-
-body:JSON.stringify({
-
-first_name:
-firstName.value,
-
-last_name:
-lastName.value,
-
-email:
-email.value,
-
-department:
-department.value,
-
-position_title:
-position.value,
-
-office_location:
-location.value,
-
-password:
-password.value
-
-})
-
-})
-
-if(response.ok){
-
-alert(
-"Registration Successful"
-)
-
-window.location="/login"
-
-}
-else{
-
-const result =
-await response.json()
-
-alert(
-result.detail ||
-"Registration Failed"
-)
-
-}
-
-})
-
-</script>
-
+    <header class="auth-header"><a class="os-brand" href="/" aria-label="AI Workforce OS home"><span class="os-brand-mark">W</span><span class="os-brand-copy"><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a><a href="/">Return to company overview <span aria-hidden="true">↗</span></a></header>
+    <main class="auth-shell">
+        <section class="auth-story"><span class="story-index">AI WORKFORCE OS <i>·</i> COMPANY OPERATIONS</span><div class="story-copy"><p class="os-eyebrow">A GOVERNED WAY TO WORK</p><h1>Make work move<br><em>with purpose.</em></h1><p>Join a services operating model that connects business goals to specialist teams, accountable AI agents, and measurable delivery.</p><div class="story-agents"><span>Business requirements</span><span>Executive assessment</span><span>Human approvals</span><span>Delivery operations</span></div></div><div class="story-foot"><span>HUMAN-LED</span><span>AI-COORDINATED</span><span>GOVERNED BY DESIGN</span></div></section>
+        <section class="auth-form-wrap"><div class="auth-card"><p class="auth-step">CREATE YOUR ACCOUNT <span>01 / 01</span></p><h2>Join the workspace.</h2><p class="subtitle">Set up your business profile. New accounts receive the standard user role.</p>
+            <form id="registerForm">
+                <div class="grid"><div><label for="firstName">First name</label><input id="firstName" name="first_name" autocomplete="given-name" placeholder="First name" required></div><div><label for="lastName">Last name</label><input id="lastName" name="last_name" autocomplete="family-name" placeholder="Last name" required></div></div>
+                <label for="email">Work email</label><input id="email" name="email" type="email" autocomplete="email" placeholder="name@company.com" required>
+                <div class="grid"><div><label for="department">Department</label><input id="department" name="department" autocomplete="organization-title" placeholder="Optional"></div><div><label for="position">Position</label><input id="position" name="position_title" placeholder="Optional"></div></div>
+                <label for="location">Office location</label><input id="location" name="office_location" autocomplete="address-level2" placeholder="Optional">
+                <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="At least 12 characters" required>
+                <button class="btn" type="submit"><span>Create account</span><span aria-hidden="true">→</span></button><p id="authMessage" class="auth-message" role="status" aria-live="polite"></p>
+            </form>
+            <div class="link">Already have access? <a href="/login">Sign in</a></div>
+            <div class="auth-assurance"><span class="assurance-mark">◇</span>Role selection is controlled by company administration.</div>
+        </div></section>
+    </main>
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const button = form.querySelector("button[type=submit]");
+            const message = document.getElementById("authMessage");
+            const originalLabel = button.querySelector("span:first-child").textContent;
+            button.disabled = true;
+            button.querySelector("span:first-child").textContent = "Creating account…";
+            message.textContent = "";
+            try {
+                const response = await fetch("/users/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        first_name: document.getElementById("firstName").value.trim(),
+                        last_name: document.getElementById("lastName").value.trim(),
+                        email: document.getElementById("email").value.trim(),
+                        department: document.getElementById("department").value.trim() || null,
+                        position_title: document.getElementById("position").value.trim() || null,
+                        office_location: document.getElementById("location").value.trim() || null,
+                        password: document.getElementById("password").value,
+                    }),
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    const detail = Array.isArray(result.detail)
+                        ? result.detail.map((issue) => `${issue.loc?.at(-1) || "Input"}: ${issue.msg}`).join(". ")
+                        : result.detail;
+                    throw new Error(detail || "Registration failed. Please check your details.");
+                }
+                message.classList.remove("error");
+                message.classList.add("success");
+                message.textContent = "Account created. Redirecting to sign in…";
+                window.setTimeout(() => { window.location = "/login"; }, 900);
+            } catch (error) {
+                message.classList.add("error");
+                message.textContent = error.message || "Unable to reach the registration service.";
+            } finally {
+                button.disabled = false;
+                button.querySelector("span:first-child").textContent = originalLabel;
+            }
+        });
+    </script>
 </body>
 </html>

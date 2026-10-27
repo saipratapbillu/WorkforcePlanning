@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#153b30">
+    <title>Business Requirement Intake | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/requirement-chat.css?v=20261027h">
+    <script src="/static/requirement-chat.js?v=20261027j" defer></script>
+    <script src="/static/mobile-nav.js?v=20261023a" defer></script>
+</head>
+<body>
+    <div class="preview-notice"><span class="notice-mark">i</span><span><strong>Guided intake preview</strong> AI CEO follow-up is rule-based in this MVP. Responses are stored only when you submit.</span></div>
+    <div class="page-shell">
+        <aside class="sidebar">
+            <a class="brand" href="/" aria-label="AI Workforce OS home"><span class="brand-mark">W</span><span><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a>
+            <div class="nav-caption">WORKSPACE</div>
+            <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-expanded="false" aria-controls="intakeNavigation">Workspace menu</button>
+            <nav id="intakeNavigation" class="mobile-nav" aria-label="Main navigation">
+                <a href="/dashboard"><span>◫</span>Dashboard</a>
+                <a href="/requests"><span>↗</span>My requests</a>
+                <a class="active" href="/static/requirement-chat.html"><span>▤</span>Requirements</a>
+                <a href="/approvals"><span>✓</span>Approvals</a>
+                <a href="/projects"><span>▧</span>Projects</a>
+                <a href="/profile"><span>◎</span>Profile</a>
+            </nav>
+            <div class="sidebar-note"><span class="status-dot"></span><span><strong>Governed intake</strong><small>Nothing is approved automatically.</small></span></div>
+        </aside>
+
+        <main class="main-area">
+            <header class="topbar"><div class="breadcrumbs">Requirements <span>/</span> New request</div><a class="back-link" href="/">← Back to workspace</a></header>
+            <div class="content-wrap">
+                <section class="intro">
+                    <div><p class="eyebrow">REQUIREMENT WORKFLOW <span>01 / 06</span></p><h1>Let’s shape your idea.</h1><p class="intro-copy">Tell the AI CEO what your business needs. We’ll clarify the request together before it enters assessment.</p></div>
+                    <div class="step-indicator" aria-label="Guided conversation, six core topics"><span class="step-current">01</span><span class="step-line"></span><span>06</span></div>
+                </section>
+
+                <div class="workspace-grid">
+                    <section class="conversation-panel" aria-label="Requirement conversation">
+                        <div class="conversation-header"><div class="ceo-avatar">CE</div><div><strong>AI CEO <span class="online-indicator"></span></strong><small>Requirement discovery · guided mode</small></div><button id="restartButton" class="restart-button" type="button" title="Restart conversation" aria-label="Restart conversation">↺</button></div>
+                        <div id="chatMessages" class="chat-messages" aria-live="polite" aria-relevant="additions text"></div>
+                        <div class="prompt-hint" id="promptHint">Be as specific as you can. You can say “not sure” and we’ll record it as an open question.</div>
+                        <form id="chatForm" class="chat-composer">
+                            <label class="sr-only" for="answerInput">Your response</label>
+                            <textarea id="answerInput" rows="2" maxlength="2000" placeholder="Type your response…" required></textarea>
+                            <div class="composer-footer"><span id="characterCount">0 / 2000</span><button id="sendButton" type="submit"><span>Send answer</span><span aria-hidden="true">↑</span></button></div>
+                        </form>
+                        <div class="conversation-footnote"><span class="lock-mark">◇</span>Do not include passwords, payment card data, or other secrets.</div>
+                    </section>
+
+                    <aside class="brief-panel" aria-label="Requirement brief summary">
+                        <div class="brief-heading"><div><p class="eyebrow">LIVE BRIEF</p><h2>Your requirement</h2></div><span class="draft-label"><i></i>Not submitted</span></div>
+                        <p class="brief-description">Your answers will form a structured business brief. Review it before it is saved.</p>
+                        <div class="brief-fields">
+                            <div class="brief-field"><span>Business problem</span><p id="summaryProblem">Waiting for your response</p></div>
+                            <div class="brief-field"><span>Expected outcome</span><p id="summaryOutcome">Waiting for your response</p></div>
+                            <div class="brief-field"><span>Users &amp; stakeholders</span><p id="summaryUsers">Not discussed yet</p></div>
+                            <div class="brief-field"><span>Systems &amp; data</span><p id="summarySystems">Not discussed yet</p></div>
+                            <div class="brief-field"><span>Constraints &amp; security</span><p id="summaryConstraints">Not discussed yet</p></div>
+                            <div class="brief-field priority-field"><span>Urgency</span><div class="priority-options" role="group" aria-label="Requirement priority"><button type="button" data-priority="Low">Low</button><button type="button" data-priority="Medium" class="selected">Medium</button><button type="button" data-priority="High">High</button><button type="button" data-priority="Critical">Critical</button></div><small>High or Critical requests are queued for CEO assessment after submission.</small></div>
+                            <div class="brief-field"><span>Requested by</span><p id="summaryRequester">Business User</p></div>
+                        </div>
+                        <button id="submitRequirement" class="submit-button" type="button" disabled><span>Submit requirement</span><span>→</span></button>
+                        <p class="approval-note">Submission records your request. It does not approve funding or authorize delivery.</p>
+                    </aside>
+                </div>
+                <footer class="page-footer"><span>AI WORKFORCE OS <i>·</i> REQUIREMENT MANAGEMENT</span><span>Draft stays in this browser until submitted</span></footer>
+            </div>
+        </main>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

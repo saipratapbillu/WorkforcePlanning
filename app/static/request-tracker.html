@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#153b30">
+    <title>My Requests | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/request-tracker.css?v=20261023b">
+    <script src="/static/request-tracker.js?v=20261023d" defer></script>
+    <script src="/static/mobile-nav.js?v=20261023a" defer></script>
+</head>
+<body>
+    <div class="tracker-shell">
+        <aside class="tracker-sidebar">
+            <a class="os-brand" href="/" aria-label="AI Workforce OS home"><span class="os-brand-mark">W</span><span class="os-brand-copy"><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a>
+            <div class="tracker-nav-label">WORKSPACE</div>
+            <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-expanded="false" aria-controls="trackerNavigation">Workspace menu</button>
+            <nav id="trackerNavigation" class="mobile-nav" aria-label="Main navigation">
+                <a href="/dashboard"><span>◫</span>Overview</a>
+                <a class="active" href="/requests"><span>↗</span>My requests</a>
+                <a href="/static/requirement-chat.html"><span>＋</span>New requirement</a>
+                <a href="/approval-center"><span>✓</span>Approval center</a>
+                <a href="/profile"><span>◎</span>Profile</a>
+            </nav>
+            <div class="tracker-sidebar-note"><span class="status-dot"></span><span><strong>Request visibility</strong><small id="visibilityNote">Requests are access-controlled.</small></span></div>
+        </aside>
+        <main class="tracker-main">
+            <header class="tracker-topbar"><div><span>Company workspace</span><b>/</b><strong>My requests</strong></div><a class="new-request-button" href="/static/requirement-chat.html">＋ New requirement</a></header>
+            <div class="tracker-content">
+                <section class="tracker-heading"><div><p class="os-eyebrow">REQUIREMENT MANAGEMENT</p><h1 class="os-heading">Your requests, in progress.</h1><p>See where each request is, what has been recorded, and what needs to happen next.</p></div><button id="refreshRequests" class="refresh-button" type="button" aria-label="Refresh requests" title="Refresh requests">↻</button></section>
+                <div id="trackerAlert" class="tracker-alert" role="status" aria-live="polite" hidden></div>
+                <section class="tracker-grid" aria-label="Requirement request tracker">
+                    <aside class="request-list-panel">
+                        <div class="list-header"><div><p class="os-eyebrow">REQUEST QUEUE</p><h2 class="os-heading">My requests <span id="requestCount">0</span></h2></div><select id="statusFilter" aria-label="Filter requests by status"><option value="">All statuses</option><option value="Submitted">Submitted</option><option value="Assessed">Assessed</option><option value="PendingApproval">Pending approval</option><option value="Approved">Approved</option><option value="Rejected">Rejected</option></select></div>
+                        <label class="search-label" for="requestSearch">Search requests</label><input id="requestSearch" class="request-search" type="search" placeholder="Search by title or ID…">
+                        <div id="requestList" class="request-list" aria-live="polite"><div class="list-empty">Loading your requests…</div></div>
+                    </aside>
+                    <section id="requestDetail" class="request-detail" aria-live="polite"><div class="detail-empty"><span class="empty-mark">↗</span><h2>Select a request</h2><p>Choose a request from your queue to see its recorded status and workflow evidence.</p></div></section>
+                </section>
+                <footer class="tracker-footer"><span>AI WORKFORCE OS <i>·</i> REQUEST TRACKER</span><span>Status reflects persisted workflow records. Missing approval/project records are shown explicitly.</span></footer>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
