@@ -81,4 +81,5 @@ webencodings==0.6.1
 websockets==17.3
 yarg==0.1.9
 
+psycopg[binary]==3.2.10
 pydantic-settings==2.5.2
