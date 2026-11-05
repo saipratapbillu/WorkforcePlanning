@@ -1,5 +1,4 @@
 @echo off
-<<<<<<< HEAD
 setlocal
 cd /d "%~dp0"
 
@@ -182,10 +181,3 @@ echo AI Company stopped.
 pause
 
 endlocal
-=======
-if not exist .env copy .env.example .env
-python -m venv .venv
-call .venv\Scripts\activate
-python -m pip install -r requirements.txt
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
->>>>>>> 3e08d0de30e4b712c5b3c8c50b4f61e4d04df639
