@@ -50,6 +50,16 @@ class StaticPageAccessTests(unittest.TestCase):
             with self.subTest(role=role):
                 self.assertIsNotNone(self.request_static_page("user-management.html", role))
 
+    def test_admin_workspace_direct_static_url_requires_platform_owner(self):
+        for role in ("BUSINESS_USER", "APPROVER", "EXECUTIVE", "WORKFORCE_MANAGER"):
+            with self.subTest(role=role):
+                with self.assertRaises(HTTPException) as raised:
+                    self.request_static_page("admin-workspace.html", role)
+                self.assertEqual(raised.exception.status_code, 403)
+        for role in ("PLATFORM_OWNER", "OWNER", "SUPER_ADMIN"):
+            with self.subTest(role=role):
+                self.assertIsNotNone(self.request_static_page("admin-workspace.html", role))
+
     def test_workforce_management_direct_url_requires_management_role(self):
         for role in ("BUSINESS_USER", "APPROVER", "EXECUTIVE"):
             with self.subTest(role=role):

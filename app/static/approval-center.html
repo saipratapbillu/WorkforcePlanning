@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#153b30">
     <title>Approval Center | AI Workforce OS</title>
     <link rel="stylesheet" href="/static/brand.css?v=20261023b">
-    <link rel="stylesheet" href="/static/approval-center.css?v=20261023b">
-    <script src="/static/approval-center.js?v=20261106a" defer></script>
+    <link rel="stylesheet" href="/static/approval-center.css?v=20261106b">
+    <script src="/static/approval-center.js?v=20261106b" defer></script>
     <script src="/static/mobile-nav.js?v=20261023a" defer></script>
 </head>
 <body>
@@ -25,7 +25,13 @@
                 <section class="approval-heading"><div><p class="os-eyebrow">GOVERNANCE WORKFLOW</p><h1 class="os-heading">Approval center.</h1><p>Review the request, record a reasoned decision, and let the workflow continue only when its approval gate is satisfied.</p></div><button id="refreshApprovals" type="button" class="refresh-button" aria-label="Refresh approval queue">↻</button></section>
                 <div id="approvalAlert" class="approval-alert" role="status" aria-live="polite" hidden></div>
                 <div class="approval-layout">
-                    <section class="approval-queue-panel"><div class="queue-heading"><div><p class="os-eyebrow">YOUR QUEUE</p><h2 class="os-heading">Pending approvals <span id="pendingCount">0</span></h2></div><select id="queueFilter" aria-label="Filter approvals"><option value="Pending">Pending</option><option value="all">All decisions</option></select></div><div id="approvalQueue" class="approval-queue"><p class="queue-empty">Loading approvals…</p></div></section>
+                    <section class="approval-queue-panel"><div class="queue-heading"><div><p class="os-eyebrow">YOUR QUEUE</p><h2 id="queueTitle" class="os-heading">My approvals <span id="filterCount">0</span></h2></div></div><div class="approval-filters" role="tablist" aria-label="Filter approval queue">
+                        <button type="button" role="tab" aria-selected="true" data-filter="my">My approvals</button>
+                        <button type="button" role="tab" aria-selected="false" data-filter="pending">Pending</button>
+                        <button type="button" role="tab" aria-selected="false" data-filter="approved">Approved</button>
+                        <button type="button" role="tab" aria-selected="false" data-filter="rejected">Rejected</button>
+                        <button type="button" role="tab" aria-selected="false" data-filter="assigned">Assigned to me</button>
+                    </div><div id="approvalQueue" class="approval-queue"><p class="queue-empty">Loading approval queue…</p></div></section>
                     <section id="approvalDetail" class="approval-detail"><div class="detail-empty"><span>✓</span><h2>Select an approval</h2><p>Approval details and decision controls appear here.</p></div></section>
                 </div>
                 <footer class="approval-footer"><span>AI WORKFORCE OS <i>·</i> GOVERNANCE</span><span>Actions are authorized server-side and recorded in the audit log.</span></footer>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#173c33">
+    <title>Diagram Factory | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/platform-tools.css?v=20261106a">
+    <script src="/static/diagram-factory.js?v=20261106a" defer></script>
+</head>
+<body>
+    <header class="tool-topbar"><a class="os-brand" href="/dashboard" aria-label="Return to workspace"><span class="os-brand-mark">W</span><span class="os-brand-copy"><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a><nav aria-label="Workspace"><a href="/dashboard">Workspace</a><a href="/workforce-center">Workforce</a><a href="/blueprint-explorer">Blueprint Explorer</a><a href="/profile">Profile</a></nav></header>
+    <main class="tool-content">
+        <section class="tool-heading"><div><p class="eyebrow">DETERMINISTIC ARCHITECTURE PREVIEW</p><h1>Diagram Factory</h1><p>Generate architecture views from the same structured requirement blueprint.</p></div><span class="notice-tag">Preview · not validated for deployment</span></section>
+        <form id="diagramForm" class="input-surface">
+            <div class="form-grid"><label>Requirement title<input id="requirementTitle" required minlength="3" maxlength="200" placeholder="Customer analytics portal"></label><label>Business domain<input id="domain" maxlength="120" placeholder="Retail, healthcare, finance"></label><label class="wide">Requirement detail<textarea id="requirementDescription" required minlength="20" maxlength="12000" placeholder="Describe outcomes, users, regions, constraints, compliance and integrations."></textarea></label><label>Technology changes<input id="technologies" placeholder="Azure, Power BI, mobile"></label><label>Diagram<select id="diagramType"><option value="solution">Architecture</option><option value="database">Database</option><option value="api">API</option><option value="deployment">Deployment</option><option value="hosting">Hosting</option><option value="enterprise">Enterprise</option><option value="application">Application</option><option value="security">Security</option><option value="operations">Operations</option></select></label><label>View<select id="diagramView"><option value="technical_view">Technical</option><option value="executive_view">Executive</option></select></label><label>Priority<select id="priority"><option>Medium</option><option>Low</option><option>High</option><option>Critical</option></select></label></div>
+            <div class="form-actions"><button class="primary" type="submit">Generate diagram</button><button id="downloadSvg" type="button" disabled>Download SVG</button></div>
+        </form>
+        <p id="status" class="status" role="status" aria-live="polite">Enter a requirement to generate a diagram preview.</p>
+        <section class="surface diagram-surface"><div class="section-heading"><div><p class="eyebrow">GENERATED VIEW</p><h2 id="diagramTitle">Diagram preview</h2></div><span id="diagramMeta" class="muted"></span></div><div id="diagramCanvas" class="diagram-canvas"><p class="empty">Generated diagram will appear here.</p></div></section>
+        <footer class="tool-footer">SVG is generated from proposed blueprint data. No renderer, deployment, or external provider is invoked.</footer>
+    </main>
+</body>
+</html>

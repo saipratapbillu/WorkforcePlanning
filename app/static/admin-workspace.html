@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#173c33">
+    <title>Super Admin Workspace | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/admin-workspace.css?v=20261106a">
+    <script src="/static/admin-workspace.js?v=20261106a" defer></script>
+</head>
+<body>
+    <div class="admin-workspace">
+        <aside class="admin-sidebar">
+            <a class="os-brand" href="/dashboard" aria-label="Return to company workspace"><span class="os-brand-mark">W</span><span class="os-brand-copy"><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a>
+            <p class="sidebar-label">PLATFORM CONTROL</p>
+            <nav id="adminTabs" class="admin-tabs" aria-label="Super Admin sections" role="tablist" aria-orientation="vertical">
+                <button role="tab" id="tab-dashboard" aria-controls="panel-dashboard" aria-selected="true" data-tab="dashboard">Dashboard</button>
+                <button role="tab" id="tab-users" aria-controls="panel-users" aria-selected="false" data-tab="users">Users</button>
+                <button role="tab" id="tab-roles" aria-controls="panel-roles" aria-selected="false" data-tab="roles">Roles</button>
+                <button role="tab" id="tab-skills" aria-controls="panel-skills" aria-selected="false" data-tab="skills">Skills</button>
+                <button role="tab" id="tab-departments" aria-controls="panel-departments" aria-selected="false" data-tab="departments">Departments</button>
+                <button role="tab" id="tab-positions" aria-controls="panel-positions" aria-selected="false" data-tab="positions">Positions</button>
+                <button role="tab" id="tab-approvals" aria-controls="panel-approvals" aria-selected="false" data-tab="approvals">Approvals</button>
+                <button role="tab" id="tab-projects" aria-controls="panel-projects" aria-selected="false" data-tab="projects">Projects</button>
+                <button role="tab" id="tab-workforce" aria-controls="panel-workforce" aria-selected="false" data-tab="workforce">Workforce</button>
+                <button role="tab" id="tab-execution" aria-controls="panel-execution" aria-selected="false" data-tab="execution">Execution</button>
+                <button role="tab" id="tab-audit" aria-controls="panel-audit" aria-selected="false" data-tab="audit">Audit</button>
+                <button role="tab" id="tab-health" aria-controls="panel-health" aria-selected="false" data-tab="health">Health</button>
+                <button role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" data-tab="settings">Settings</button>
+            </nav>
+            <div class="sidebar-footer"><a href="/dashboard">Back to workspace</a><a href="/profile">Account profile</a></div>
+        </aside>
+        <main class="admin-main">
+            <header class="topbar"><div><span>Company workspace</span><b>/</b><strong>Super Admin</strong></div><div class="top-actions"><span id="adminIdentity">Verifying session...</span><button id="refreshCurrent" type="button" title="Refresh current view">Refresh</button></div></header>
+            <div class="content">
+                <section class="page-heading"><div><p class="eyebrow">CONTROL PLANE · VERIFIED RECORDS</p><h1 id="pageTitle">Platform dashboard</h1><p id="pageDescription">Live administrative overview. Data availability is shown per source.</p></div><span class="security-label">Owner-authorized</span></section>
+                <p id="workspaceStatus" class="status" role="status" aria-live="polite">Loading platform records...</p>
+
+                <section id="panel-dashboard" class="tab-panel" role="tabpanel" aria-labelledby="tab-dashboard">
+                    <div class="metric-grid" id="platformMetrics"></div>
+                    <div class="workspace-grid"><section class="surface"><div class="section-heading"><div><p class="eyebrow">ADMINISTRATION</p><h2>Common tasks</h2></div></div><div class="link-list"><a href="/user-management"><strong>Manage accounts</strong><span>Create users, manage access and organization assignments.</span></a><a href="/admin-control-center"><strong>Organization & operations</strong><span>Mappings, readiness evidence, adapters and governance reports.</span></a><a href="/approval-center"><strong>Review approvals</strong><span>Open the governed approval queue.</span></a><a href="/execution-management"><strong>Delivery execution</strong><span>Review epics, sprints, tasks and assignments.</span></a></div></section><section class="surface"><div class="section-heading"><div><p class="eyebrow">SOURCE STATUS</p><h2>Connected records</h2></div></div><div id="sourceStatus" class="source-list"></div></section></div>
+                </section>
+                <section id="panel-users" class="tab-panel" role="tabpanel" aria-labelledby="tab-users" hidden><div class="surface"><div class="section-heading"><div><p class="eyebrow">IDENTITY</p><h2>Users</h2></div><a class="action-link" href="/user-management">Open user administration</a></div><div id="usersContent" class="table-scroll"></div></div></section>
+                <section id="panel-roles" class="tab-panel" role="tabpanel" aria-labelledby="tab-roles" hidden><div class="surface"><div class="section-heading"><div><p class="eyebrow">ACCESS CONTROL</p><h2>Active roles</h2></div><span class="muted">Role assignment remains in User Administration.</span></div><div id="rolesContent" class="record-grid"></div></div></section>
+                <section id="panel-skills" class="tab-panel" role="tabpanel" aria-labelledby="tab-skills" hidden><div class="surface"><div class="section-heading"><div><p class="eyebrow">WORKFORCE CATALOG</p><h2>Skills</h2></div><a class="action-link" href="/workforce-management">Review skill evidence</a></div><div id="skillsContent" class="record-grid"></div></div></section>
+                <section id="panel-departments" class="tab-panel" role="tabpanel" aria-labelledby="tab-departments" hidden><div class="surface"><div class="section-heading"><div><p class="eyebrow">ORGANIZATION</p><h2>Departments</h2></div><a class="action-link" href="/user-management">Assign organization scope</a></div><div id="departmentsContent" class="record-grid"></div></div></section>
+                <section id="panel-positions" class="tab-panel" role="tabpanel" aria-labelledby="tab-positions" hidden><div class="surface"><div class="section-heading"><div><p class="eyebrow">ORGANIZATION</p><h2>Positions</h2></div><a class="action-link" href="/user-management">Assign position</a></div><div id="positionsContent" class="record-grid"></div></div></section>
+                <section id="panel-approvals" class="tab-panel" role="tabpanel" aria-labelledby="tab-approvals" hidden><div class="surface"><div class="section-heading"><div><p class="eyebrow">GOVERNANCE</p><h2>Approval queue</h2></div><a class="action-link" href="/approval-center">Open approval center</a></div><div id="approvalsContent" class="table-scroll"></div></div></section>
+                <section id="panel-projects" class="tab-panel" role="tabpanel" aria-labelledby="tab-projects" hidden><div class="surface"><div class="section-heading"><div><p class="eyebrow">DELIVERY</p><h2>Visible projects</h2></div><a class="action-link" href="/projects">Open projects</a></div><div id="projectsContent" class="table-scroll"></div></div></section>
+                <section id="panel-workforce" class="tab-panel" role="tabpanel" aria-labelledby="tab-workforce" hidden><div class="surface"><div class="section-heading"><div><p class="eyebrow">CAPACITY</p><h2>Workforce capacity</h2></div><a class="action-link" href="/workforce-center">Workforce planning</a></div><div id="workforceContent" class="table-scroll"></div></div></section>
+                <section id="panel-execution" class="tab-panel" role="tabpanel" aria-labelledby="tab-execution" hidden><div class="surface"><div class="section-heading"><div><p class="eyebrow">DELIVERY OPERATIONS</p><h2>Execution workspace</h2></div><a class="action-link" href="/execution-management">Open execution management</a></div><p class="muted">Project execution is managed in its governed workspace. This panel does not create assignments or change task state.</p></div></section>
+                <section id="panel-audit" class="tab-panel" role="tabpanel" aria-labelledby="tab-audit" hidden><div class="surface"><div class="section-heading"><div><p class="eyebrow">EVIDENCE</p><h2>Recent operations audit</h2></div><a class="action-link" href="/admin-control-center">Full operations review</a></div><div id="auditContent" class="table-scroll"></div></div></section>
+                <section id="panel-health" class="tab-panel" role="tabpanel" aria-labelledby="tab-health" hidden><div class="surface"><div class="section-heading"><div><p class="eyebrow">SERVICE STATUS</p><h2>Health checks</h2></div><button id="refreshHealth" type="button">Run checks</button></div><div id="healthContent" class="source-list"></div></div></section>
+                <section id="panel-settings" class="tab-panel" role="tabpanel" aria-labelledby="tab-settings" hidden><div class="surface"><div class="section-heading"><div><p class="eyebrow">PLATFORM CONFIGURATION</p><h2>Settings and integrations</h2></div><a class="action-link" href="/admin-control-center">Open operations configuration</a></div><div id="settingsContent" class="source-list"></div></div></section>
+                <footer class="page-footer">Administrative changes remain subject to server-side authorization and audit. Catalog views are read-only here.</footer>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

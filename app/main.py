@@ -42,9 +42,12 @@ STATIC_HTML_ROLES = {
     "owner-command-center.html": {"EXECUTIVE", "PLATFORM_OWNER"},
     "executive-command-center.html": {"EXECUTIVE", "PLATFORM_OWNER"},
     "admin-control-center.html": {"PLATFORM_OWNER"},
+    "admin-workspace.html": {"PLATFORM_OWNER"},
     "user-management.html": {"PLATFORM_OWNER"},
     "workforce-management.html": {"WORKFORCE_MANAGER", "PLATFORM_OWNER"},
     "execution-management.html": {"WORKFORCE_MANAGER", "PLATFORM_OWNER"},
+    "blueprint-explorer.html": {"EXECUTIVE", "WORKFORCE_MANAGER", "PLATFORM_OWNER"},
+    "diagram-factory.html": {"EXECUTIVE", "WORKFORCE_MANAGER", "PLATFORM_OWNER"},
 }
 
 
@@ -193,6 +196,21 @@ def executive_command_center_page(_user=Depends(require_roles("EXECUTIVE", "PLAT
 @app.get("/admin-control-center", include_in_schema=False)
 def admin_control_center_page(_user=Depends(require_roles("PLATFORM_OWNER"))):
     return FileResponse(STATIC_DIR / "admin-control-center.html")
+
+
+@app.get("/admin-workspace", include_in_schema=False)
+def admin_workspace_page(_user=Depends(require_roles("PLATFORM_OWNER"))):
+    return FileResponse(STATIC_DIR / "admin-workspace.html")
+
+
+@app.get("/blueprint-explorer", include_in_schema=False)
+def blueprint_explorer_page(_user=Depends(require_roles("EXECUTIVE", "WORKFORCE_MANAGER", "PLATFORM_OWNER"))):
+    return FileResponse(STATIC_DIR / "blueprint-explorer.html")
+
+
+@app.get("/diagram-factory", include_in_schema=False)
+def diagram_factory_page(_user=Depends(require_roles("EXECUTIVE", "WORKFORCE_MANAGER", "PLATFORM_OWNER"))):
+    return FileResponse(STATIC_DIR / "diagram-factory.html")
 
 
 @app.get("/user-management", include_in_schema=False)

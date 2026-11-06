@@ -1,9 +1,8 @@
 (() => {
-    const state = { items: [], selectedId: null, role: "USER" };
+    const state = { items: [], selectedId: null, role: "USER", userId: null, filter: "my" };
     const $ = (id) => document.getElementById(id);
     const queue = $("approvalQueue");
     const detail = $("approvalDetail");
-    const filter = $("queueFilter");
     const alertBox = $("approvalAlert");
 
     function el(tag, className, text) {
@@ -22,12 +21,22 @@
         alertBox.hidden = !message;
     }
     function renderQueue() {
-        const filtered = state.items.filter((item) => filter.value === "all" || item.status === "Pending");
+        const filtered = state.items.filter((item) => {
+            if (state.filter === "pending") return item.status === "Pending";
+            if (state.filter === "approved") return item.status === "Approved";
+            if (state.filter === "rejected") return item.status === "Rejected";
+            if (state.filter === "assigned") return String(item.assigned_to_user_id || "").toLowerCase() === String(state.userId || "").toLowerCase();
+            return true;
+        });
         queue.replaceChildren();
-        const pendingCount = state.items.filter((item) => item.status === "Pending").length;
-        $("pendingCount").textContent = String(pendingCount);
+        const titles = { my: "My approvals", pending: "Pending approvals", approved: "Approved", rejected: "Rejected", assigned: "Assigned to me" };
+        $("queueTitle").firstChild.textContent = `${titles[state.filter]} `;
+        $("filterCount").textContent = String(filtered.length);
+        document.querySelectorAll("[data-filter]").forEach((button) => {
+            button.setAttribute("aria-selected", String(button.dataset.filter === state.filter));
+        });
         if (!filtered.length) {
-            queue.append(el("p", "queue-empty", state.items.length ? "No pending approvals in this view." : "No approvals are currently assigned to you."));
+            queue.append(el("p", "queue-empty", state.items.length ? `No ${titles[state.filter].toLowerCase()} in this view.` : "No approvals are visible to this account."));
             return;
         }
         filtered.forEach((item) => {
@@ -41,7 +50,7 @@
             queue.append(button);
         });
     }
-    function selectApproval(id) {
+    async function selectApproval(id) {
         state.selectedId = id;
         renderQueue();
         const approval = state.items.find((item) => item.approval_id === id);
@@ -57,8 +66,33 @@
 
         const context = el("section", "request-context");
         context.append(el("strong", "", "REQUEST SUMMARY"));
-        context.append(el("p", "", `Priority: ${approval.requirement_priority || "Not set"}\nRequest status: ${approval.requirement_status || "Not set"}\nApproval stage: ${approval.stage}\nAssigned approver: ${approval.assigned_to_user_id}`));
+        context.append(el("p", "", `Priority: ${approval.requirement_priority || "Not set"}\nRequest status: ${approval.requirement_status || "Not set"}\nApproval stage: ${approval.stage}\nAssigned approver: ${approval.assigned_to_user_id || "Not assigned"}`));
         detail.append(context);
+
+        const notes = el("section", "request-context");
+        notes.append(el("strong", "", "COMMENTS / DECISION REASON"));
+        notes.append(el("p", "decision-reason-copy", approval.comments || "No comments or decision reason have been recorded."));
+        detail.append(notes);
+
+        const timeline = el("section", "request-context");
+        timeline.append(el("strong", "", "APPROVAL TIMELINE & AUDIT EVENTS"));
+        const events = el("ol", "approval-timeline");
+        events.append(timelineEvent("Approval submitted", approval.created_at_utc, "Workflow record created."));
+        if (approval.approved_at_utc) events.append(timelineEvent("Approval completed", approval.approved_at_utc, "Approved timestamp recorded."));
+        try {
+            const history = await requestApprovalHistory(approval.approval_id);
+            history.forEach((item) => events.append(timelineEvent(
+                item.action,
+                item.created_at_utc,
+                `${item.outcome} · ${item.actor_type} · ${item.actor_id}`,
+            )));
+            if (!history.length) timeline.append(el("p", "approval-audit-note", "No decision audit event is recorded yet. Creation is shown from the approval record."));
+        } catch (error) {
+            timeline.append(el("p", "approval-audit-note", `Audit events unavailable: ${error.message}`));
+        }
+        timeline.append(events);
+        timeline.append(el("p", "approval-audit-note", "Events are read from the approval audit record. This view does not expose unrelated audit details."));
+        detail.append(timeline);
 
         if (approval.status !== "Pending" || !approval.can_decide) {
             const closed = el("div", "decision-notice", `This approval is ${approval.status.toLowerCase()}. Its decision is recorded and cannot be changed here.`);
@@ -66,11 +100,6 @@
                 closed.textContent = "You can view this approval, but only its assigned approver or Owner/Super Admin can record a decision.";
             }
             detail.append(closed);
-            if (approval.comments) {
-                const reason = el("section", "request-context");
-                reason.append(el("strong", "", "RECORDED DECISION REASON"), el("p", "", approval.comments));
-                detail.append(reason);
-            }
             return;
         }
 
@@ -96,6 +125,26 @@
             actions.append(button);
         });
         detail.append(actions, el("p", "decision-notice", "Approving only advances the workflow after all approvals in this stage are approved. Rejection or an information request stops delivery."));
+    }
+
+    function timelineEvent(title, date, detailText) {
+        const item = el("li", "");
+        item.append(el("span", "timeline-dot"));
+        const copy = el("span", "timeline-copy");
+        copy.append(el("strong", "", title), el("span", "", `${formatDate(date) || "Time unavailable"} · ${detailText}`));
+        item.append(copy);
+        return item;
+    }
+
+    async function requestApprovalHistory(approvalId) {
+        const response = await fetch(`/approvals/${encodeURIComponent(approvalId)}/history`, {
+            credentials: "same-origin",
+            headers: { Accept: "application/json" },
+            cache: "no-store",
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result?.error?.message || result.detail || `Audit history failed (${response.status}).`);
+        return Array.isArray(result) ? result : [];
     }
 
     async function submitDecision(approval, action, textarea, activeButton, actions) {
@@ -140,6 +189,7 @@
             const data = await approvalsResponse.json().catch(() => ({}));
             if (!profileResponse.ok || !approvalsResponse.ok) throw new Error(data.detail || "Your role cannot access the approval queue.");
             state.role = profile.role || "USER";
+            state.userId = profile.user_id || profile.id || null;
             $("roleLabel").textContent = state.role.replaceAll("_", " ");
             state.items = Array.isArray(data) ? data : [];
             renderQueue();
@@ -159,7 +209,12 @@
         }
     }
 
-    filter.addEventListener("change", renderQueue);
+    document.querySelectorAll("[data-filter]").forEach((button) => {
+        button.addEventListener("click", () => {
+            state.filter = button.dataset.filter;
+            renderQueue();
+        });
+    });
     $("refreshApprovals").addEventListener("click", loadApprovals);
     loadApprovals();
 })();

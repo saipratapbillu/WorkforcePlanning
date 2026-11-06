@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#173c33">
+    <title>Blueprint Explorer | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/platform-tools.css?v=20261106a">
+    <script src="/static/blueprint-explorer.js?v=20261106a" defer></script>
+</head>
+<body>
+    <header class="tool-topbar"><a class="os-brand" href="/dashboard" aria-label="Return to workspace"><span class="os-brand-mark">W</span><span class="os-brand-copy"><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a><nav aria-label="Workspace"><a href="/dashboard">Workspace</a><a href="/workforce-center">Workforce</a><a href="/diagram-factory">Diagram Factory</a><a href="/profile">Profile</a></nav></header>
+    <main class="tool-content">
+        <section class="tool-heading"><div><p class="eyebrow">READ-ONLY DEPENDENCY EXPLORER</p><h1>Blueprint Explorer</h1><p>Inspect generated package dependencies, search artifacts, and review downstream impact.</p></div><span class="notice-tag">Transient · no version history</span></section>
+        <form id="blueprintForm" class="input-surface">
+            <div class="form-grid"><label>Requirement title<input id="requirementTitle" required minlength="3" maxlength="200" placeholder="Customer analytics portal"></label><label>Business domain<input id="domain" maxlength="120" placeholder="Retail, healthcare, finance"></label><label class="wide">Requirement detail<textarea id="requirementDescription" required minlength="20" maxlength="12000" placeholder="Describe outcomes, users, regions, constraints, compliance and integrations."></textarea></label><label>Technology changes<input id="technologies" placeholder="Azure, Power BI, mobile"></label><label>Search packages<input id="packageSearch" maxlength="100" placeholder="database, security, capacity"></label><label>Impact of package<select id="impactPackage"><option value="">Select after generation</option></select></label><label>Priority<select id="priority"><option>Medium</option><option>Low</option><option>High</option><option>Critical</option></select></label></div>
+            <div class="form-actions"><button class="primary" type="submit">Generate explorer</button><button id="exportJson" type="button" disabled>Export JSON</button><button id="exportMarkdown" type="button" disabled>Export outline</button></div>
+        </form>
+        <p id="status" class="status" role="status" aria-live="polite">Enter a requirement to generate a transient blueprint view.</p>
+        <section id="results" class="results" hidden>
+            <div class="summary-grid" id="summary"></div>
+            <section class="surface"><div class="section-heading"><div><p class="eyebrow">DEPENDENCY GRAPH</p><h2>Package flow</h2></div><span class="muted">Edges show upstream package feeding downstream work.</span></div><div id="graph" class="graph-canvas" role="img" aria-label="Blueprint package dependency graph"></div></section>
+            <div class="result-grid"><section class="surface"><div class="section-heading"><div><p class="eyebrow">SEARCH</p><h2>Matching package paths</h2></div></div><div id="searchResults" class="result-list"></div></section><section class="surface"><div class="section-heading"><div><p class="eyebrow">IMPACT ANALYSIS</p><h2>Downstream impact</h2></div></div><div id="impactResult" class="result-list"><p class="empty">Select a package and generate the view.</p></div></section></div>
+            <section class="surface"><div class="section-heading"><div><p class="eyebrow">VERSION VIEW</p><h2>Generation history</h2></div></div><div id="versionView" class="result-list"></div></section>
+        </section>
+        <footer class="tool-footer">Generated packages are planning evidence only. They are not persisted, approved, assigned, or executed.</footer>
+    </main>
+</body>
+</html>

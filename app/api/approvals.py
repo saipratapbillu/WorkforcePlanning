@@ -3,6 +3,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import FileResponse
 from uuid import UUID
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -46,6 +47,7 @@ def approvals(request: Request, db: Session = Depends(get_db), user=Depends(get_
             "status": row["Status"],
             "comments": row["Comments"],
             "created_at_utc": row["CreatedAtUtc"],
+            "approved_at_utc": row["ApprovedAtUtc"],
             "decision_at_utc": row["DecisionAtUtc"],
             "can_decide": bool(row["CanDecide"]) and row["Status"] == "Pending",
             "requirement_title": row["RequirementTitle"],
@@ -54,6 +56,31 @@ def approvals(request: Request, db: Session = Depends(get_db), user=Depends(get_
         }
         for row in rows
     ]
+
+
+@router.get("/{approval_id}/history")
+def approval_history(
+    approval_id: UUID,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    if not SecurityService(db).GetVisibleApprovals(user, approval_id):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Approval not found")
+    rows = db.execute(text("""
+        SELECT TOP (50) CorrelationID,ActorType,ActorID,Action,Outcome,CreatedAtUtc
+        FROM dbo.AuditLog
+        WHERE ResourceType='Approval' AND ResourceID=:approval_id
+        ORDER BY CreatedAtUtc DESC,AuditLogID DESC
+    """), {"approval_id": str(approval_id)}).mappings().all()
+    return [{
+        "correlation_id": str(row["CorrelationID"]),
+        "actor_type": row["ActorType"],
+        "actor_id": row["ActorID"],
+        "action": row["Action"],
+        "outcome": row["Outcome"],
+        "created_at_utc": row["CreatedAtUtc"],
+    } for row in rows]
 
 
 @router.post("/{approval_id}/decision")
