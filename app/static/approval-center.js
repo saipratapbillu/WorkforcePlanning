@@ -133,8 +133,8 @@
         showAlert("");
         try {
             const [profileResponse, approvalsResponse] = await Promise.all([
-                fetch("/auth/me", { credentials: "same-origin" }),
-                fetch("/approvals", { credentials: "same-origin" }),
+                fetch("/auth/me", { credentials: "same-origin", headers: { Accept: "application/json" }, cache: "no-store" }),
+                fetch("/approvals", { credentials: "same-origin", headers: { Accept: "application/json" }, cache: "no-store" }),
             ]);
             const profile = await profileResponse.json().catch(() => ({}));
             const data = await approvalsResponse.json().catch(() => ({}));

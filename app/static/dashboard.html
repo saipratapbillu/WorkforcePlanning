@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -6,39 +6,58 @@
     <meta name="theme-color" content="#153b30">
     <title>Workspace | AI Workforce OS</title>
     <link rel="stylesheet" href="/static/brand.css?v=20261023a">
-    <link rel="stylesheet" href="/static/dashboard.css?v=20261023c">
+    <link rel="stylesheet" href="/static/dashboard.css?v=20261106b">
     <link rel="stylesheet" href="/static/personal-dashboard.css?v=20261023a">
-    <script src="/static/dashboard.js?v=20261023c" defer></script>
+    <script src="/static/dashboard.js?v=20261106b" defer></script>
     <script src="/static/mobile-nav.js?v=20261023a" defer></script>
 </head>
 <body>
+    <svg xmlns="http://www.w3.org/2000/svg" class="icon-library" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+        <symbol id="icon-overview" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"></rect><rect x="13" y="3" width="8" height="5" rx="1.5"></rect><rect x="13" y="10" width="8" height="11" rx="1.5"></rect><rect x="3" y="13" width="8" height="8" rx="1.5"></rect></symbol>
+        <symbol id="icon-requests" viewBox="0 0 24 24"><path d="M8 3h8l4 4v14H4V3h4Z"></path><path d="M14 3v5h5M8 13h8M8 17h6"></path></symbol>
+        <symbol id="icon-requirements" viewBox="0 0 24 24"><path d="M7 3h10v4H7zM5 5H3v16h18V5h-2M8 12h8M8 16h6"></path></symbol>
+        <symbol id="icon-approvals" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16.5 9"></path></symbol>
+        <symbol id="icon-workforce" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></symbol>
+        <symbol id="icon-capacity" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 11h18M8 15h3M8 18h6"></path></symbol>
+        <symbol id="icon-execution" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"></path></symbol>
+        <symbol id="icon-projects" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10H3V7Z"></path><path d="M3 10h18"></path></symbol>
+        <symbol id="icon-executive" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"></rect><rect x="13" y="3" width="8" height="5" rx="1"></rect><rect x="13" y="10" width="8" height="11" rx="1"></rect><rect x="3" y="13" width="8" height="8" rx="1"></rect></symbol>
+        <symbol id="icon-settings" viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"></path><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.5.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.5-.9l-1.7.7-1.4-2.4 1.4-1.1a7 7 0 0 1 0-1.8l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.5-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.5.9l1.7-.7 1.4 2.4-1.4 1.1a7 7 0 0 1 0 1.8Z" transform="translate(-1 -1)"></path></symbol>
+        <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></symbol>
+        <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10"></path></symbol>
+        <symbol id="icon-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></symbol>
+        <symbol id="icon-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"></path></symbol>
+    </svg>
     <div id="app" class="workspace-shell">
         <aside class="workspace-sidebar">
             <a class="os-brand" href="/" aria-label="AI Workforce OS home"><span class="os-brand-mark">W</span><span class="os-brand-copy"><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a>
             <div class="workspace-label">WORKSPACE</div>
             <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-expanded="false" aria-controls="workspaceNavigation">Workspace menu</button>
             <nav id="workspaceNavigation" class="mobile-nav" aria-label="Main navigation">
-                <a class="active" href="/dashboard"><span>◫</span>Overview</a>
-                <a href="/requests"><span>↗</span>My requests</a>
-                <a href="/static/requirement-chat.html"><span>▤</span>Requirements</a>
-                <a href="/approval-center"><span>✓</span>Approval center</a>
-                <a href="/workforce-center" data-allowed-roles="ADMIN,OWNER,SUPER_ADMIN"><span>⊞</span>Workforce planning</a>
-                <a href="/projects" id="projectsNavigation" data-allowed-roles="OWNER,SUPER_ADMIN"><span>▧</span>Projects</a>
-                <a href="/executive-command-center" data-allowed-roles="OWNER,SUPER_ADMIN"><span>⌘</span>Executive command center</a>
-                <a href="/admin-control-center" data-allowed-roles="OWNER,SUPER_ADMIN"><span>⚙</span>Organization & workforce admin</a>
+                <a class="active" href="/dashboard"><svg class="nav-icon"><use href="#icon-overview"></use></svg>Overview</a>
+                <a href="/requests"><svg class="nav-icon"><use href="#icon-requests"></use></svg>My requests</a>
+                <a href="/static/requirement-chat.html"><svg class="nav-icon"><use href="#icon-requirements"></use></svg>Requirements</a>
+                <a href="/approval-center"><svg class="nav-icon"><use href="#icon-approvals"></use></svg>Approval center</a>
+                <a href="/workforce-center" data-allowed-roles="WORKFORCE_MANAGER,PLATFORM_OWNER"><svg class="nav-icon"><use href="#icon-workforce"></use></svg>Workforce planning</a>
+                <a href="/workforce-management" data-allowed-roles="WORKFORCE_MANAGER,PLATFORM_OWNER"><svg class="nav-icon"><use href="#icon-capacity"></use></svg>Capacity & assignments</a>
+                <a href="/execution-management" data-allowed-roles="WORKFORCE_MANAGER,PLATFORM_OWNER,ADMIN,OWNER,SUPER_ADMIN"><svg class="nav-icon"><use href="#icon-execution"></use></svg>Delivery execution</a>
+                <a href="/projects"><svg class="nav-icon"><use href="#icon-projects"></use></svg>Projects</a>
+                <a href="/executive-command-center" data-allowed-roles="EXECUTIVE,PLATFORM_OWNER"><svg class="nav-icon"><use href="#icon-executive"></use></svg>Executive command center</a>
+                <a href="/admin-control-center" data-allowed-roles="PLATFORM_OWNER"><svg class="nav-icon"><use href="#icon-settings"></use></svg>Organization & workforce admin</a>
+                <a href="/user-management" data-allowed-roles="PLATFORM_OWNER"><svg class="nav-icon"><use href="#icon-user"></use></svg>User administration</a>
             </nav>
-            <div class="sidebar-bottom"><div class="sidebar-note"><span class="status-dot"></span><span><strong>Governed delivery</strong><small>Human decisions stay in control.</small></span></div><button class="logout-btn" type="button" onclick="logout()">Sign out <span aria-hidden="true">↗</span></button></div>
+            <div class="sidebar-bottom"><div class="sidebar-note"><span class="status-dot"></span><span><strong>Governed delivery</strong><small>Human decisions stay in control.</small></span></div><button class="logout-btn" type="button" onclick="logout()">Sign out <svg class="action-icon" aria-hidden="true"><use href="#icon-arrow"></use></svg></button></div>
         </aside>
         <main class="workspace-main">
-            <header class="workspace-topbar"><div><span class="breadcrumb-label">Company workspace</span><span class="breadcrumb-divider">/</span><span class="breadcrumb-current">Overview</span></div><a class="user-chip" href="/profile"><span class="avatar" id="userAvatar">U</span><span><strong id="userName">Workspace user</strong><small id="roleBadge">USER</small></span><span class="chip-arrow">↗</span></a></header>
+            <header class="workspace-topbar"><div><span class="breadcrumb-label">Company workspace</span><span class="breadcrumb-divider">/</span><span class="breadcrumb-current">Overview</span></div><a class="user-chip" href="/profile"><span class="avatar" id="userAvatar">U</span><span><strong id="userName">Workspace user</strong><small id="roleBadge">USER</small></span><svg class="action-icon chip-arrow" aria-hidden="true"><use href="#icon-arrow"></use></svg></a></header>
             <div class="workspace-content">
-                <section class="dashboard-heading"><div><p class="os-eyebrow">YOUR OPERATING PICTURE</p><h1 class="os-heading">Company workspace</h1><p>Track requirements as they move toward governed delivery.</p></div><a class="os-button" href="/static/requirement-chat.html">New requirement <span>→</span></a></section>
+                <section class="dashboard-heading"><div><p class="os-eyebrow">YOUR OPERATING PICTURE</p><h1 class="os-heading">Company workspace</h1><p>Track requirements as they move toward governed delivery.</p></div><a class="os-button" href="/static/requirement-chat.html">New requirement <svg class="action-icon" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></a></section>
                 <p id="dashboardError" class="dashboard-error" role="status" aria-live="polite" hidden></p>
                 <section class="kpi-grid" aria-label="Workspace overview metrics">
-                    <article class="kpi-card"><div><span>Requirements</span><i class="kpi-symbol symbol-green">▤</i></div><strong id="requirementsCount">0</strong><small>Submitted to the workflow</small></article>
-                    <article class="kpi-card"><div><span>Assessments</span><i class="kpi-symbol symbol-blue">◎</i></div><strong id="assessmentsCount">0</strong><small>Assessment records</small></article>
-                    <article class="kpi-card"><div><span>Projects</span><i class="kpi-symbol symbol-amber">▧</i></div><strong id="projectsCount">0</strong><small>Project records</small></article>
-                    <article class="kpi-card"><div><span>Approvals</span><i class="kpi-symbol symbol-coral">✓</i></div><strong id="approvalsCount">0</strong><small>Approval records</small></article>
+                    <article class="kpi-card"><div><span>Requirements</span><span class="kpi-symbol symbol-green"><svg><use href="#icon-requirements"></use></svg></span></div><strong id="requirementsCount">0</strong><small>Submitted to the workflow</small></article>
+                    <article class="kpi-card"><div><span>Assessments</span><span class="kpi-symbol symbol-blue"><svg><use href="#icon-overview"></use></svg></span></div><strong id="assessmentsCount">0</strong><small>Assessment records</small></article>
+                    <article class="kpi-card"><div><span>Projects</span><span class="kpi-symbol symbol-amber"><svg><use href="#icon-projects"></use></svg></span></div><strong id="projectsCount">0</strong><small>Project records</small></article>
+                    <article class="kpi-card"><div><span>Approvals</span><span class="kpi-symbol symbol-coral"><svg><use href="#icon-approvals"></use></svg></span></div><strong id="approvalsCount">0</strong><small>Approval records</small></article>
                 </section>
                 <section class="workspace-panel personal-data-panel" aria-label="My delivery records">
                     <div class="panel-heading"><div><p class="os-eyebrow">MY DELIVERY</p><h2 class="os-heading">My records</h2></div></div>
@@ -51,13 +70,13 @@
                 </section>
                 <section class="workspace-panel notification-panel" aria-label="Notifications">
                     <div class="panel-heading"><div><p class="os-eyebrow">INBOX</p><h2 class="os-heading">Notifications</h2></div><span id="unreadCount" class="preview-status">0 unread</span></div>
-                    <div id="notificationList" class="notification-list"><p class="notification-empty">Loading notifications…</p></div>
+                    <div id="notificationList" class="notification-list"><p class="notification-empty">Loading notifications...</p></div>
                 </section>
                 <section class="workspace-grid">
-                    <article class="workspace-panel workflow-panel"><div class="panel-heading"><div><p class="os-eyebrow">DELIVERY LIFECYCLE</p><h2 class="os-heading">From need to outcome</h2></div><span class="current-state"><i></i>Workflow overview</span></div><div class="workflow-line"><div class="workflow-step"><span class="workflow-index">01</span><strong>Requirement</strong><small>Business need</small></div><i></i><div class="workflow-step"><span class="workflow-index">02</span><strong>Assessment</strong><small>Executive agents</small></div><i></i><div class="workflow-step"><span class="workflow-index">03</span><strong>Approval</strong><small>Human decision</small></div><i></i><div class="workflow-step"><span class="workflow-index">04</span><strong>Delivery</strong><small>Project teams</small></div></div><div class="panel-action"><span>Start by explaining what your business needs.</span><a href="/static/requirement-chat.html">Begin intake <b>→</b></a></div></article>
+                    <article class="workspace-panel workflow-panel"><div class="panel-heading"><div><p class="os-eyebrow">DELIVERY LIFECYCLE</p><h2 class="os-heading">From need to outcome</h2></div><span class="current-state"><i></i>Workflow overview</span></div><div class="workflow-line"><div class="workflow-step"><span class="workflow-index">01</span><strong>Requirement</strong><small>Business need</small></div><i></i><div class="workflow-step"><span class="workflow-index">02</span><strong>Assessment</strong><small>Executive agents</small></div><i></i><div class="workflow-step"><span class="workflow-index">03</span><strong>Approval</strong><small>Human decision</small></div><i></i><div class="workflow-step"><span class="workflow-index">04</span><strong>Delivery</strong><small>Project teams</small></div></div><div class="panel-action"><span>Start by explaining what your business needs.</span><a href="/static/requirement-chat.html">Begin intake <svg class="action-icon" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></a></div></article>
                     <article class="workspace-panel leadership-panel"><div class="panel-heading"><div><p class="os-eyebrow">AI EXECUTIVE OFFICE</p><h2 class="os-heading">Leadership roles</h2></div><span class="preview-status">Role overview</span></div><div class="leader-list"><div class="leader-row"><span class="leader-avatar ceo">CE</span><span><strong>AI CEO</strong><small>Business impact &amp; strategic fit</small></span><i>01</i></div><div class="leader-row"><span class="leader-avatar cto">CT</span><span><strong>AI CTO</strong><small>Architecture &amp; technology</small></span><i>02</i></div><div class="leader-row"><span class="leader-avatar cfo">CF</span><span><strong>AI CFO</strong><small>Cost &amp; financial assessment</small></span><i>03</i></div><div class="leader-row"><span class="leader-avatar coo">CO</span><span><strong>AI COO</strong><small>Delivery &amp; capacity planning</small></span><i>04</i></div></div><p class="advisory-note">Agent outputs are advisory. Authorized people own consequential decisions.</p></article>
                 </section>
-                <footer class="workspace-footer"><span>AI WORKFORCE OS <i>·</i> COMPANY WORKSPACE</span><span>Counts reflect the connected dashboard API</span></footer>
+                <footer class="workspace-footer"><span>AI WORKFORCE OS / COMPANY WORKSPACE</span><span>Counts reflect the connected dashboard API</span></footer>
             </div>
         </main>
     </div>

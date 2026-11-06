@@ -1,13 +1,17 @@
 from contextlib import asynccontextmanager
+import logging
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.approvals import router as approvals_router
+from app.api.errors import api_error_code, api_error_response
 from app.api.auth import router as auth_router
 from app.api.dashboard import router as dashboard_router
 from app.api.model_governance import router as model_governance_router
@@ -20,6 +24,9 @@ from app.api.users import router as users_router
 from app.api.workforce import router as workforce_router
 from app.api.runtime import router as runtime_router
 from app.api.tasks import router as tasks_router
+from app.api.admin_users import router as admin_users_router
+from app.api.workforce_management import router as workforce_management_router
+from app.api.execution_management import router as execution_management_router
 from app.db.session import SessionLocal, get_db
 from app.security.dependencies import bearer_scheme, get_current_user
 from app.security.middleware import AuthorizationMiddleware
@@ -27,6 +34,7 @@ from app.security.permissions import require_roles
 from app.security.roles import has_role
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
+logger = logging.getLogger(__name__)
 PUBLIC_HTML = {"landing.html", "login.html", "register.html"}
 PUBLIC_ASSET_EXTENSIONS = {".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico", ".woff", ".woff2"}
 STATIC_HTML_ROLES = {
@@ -34,6 +42,9 @@ STATIC_HTML_ROLES = {
     "owner-command-center.html": {"EXECUTIVE", "PLATFORM_OWNER"},
     "executive-command-center.html": {"EXECUTIVE", "PLATFORM_OWNER"},
     "admin-control-center.html": {"PLATFORM_OWNER"},
+    "user-management.html": {"PLATFORM_OWNER"},
+    "workforce-management.html": {"WORKFORCE_MANAGER", "PLATFORM_OWNER"},
+    "execution-management.html": {"WORKFORCE_MANAGER", "PLATFORM_OWNER"},
 }
 
 
@@ -43,6 +54,8 @@ async def lifespan(_app):
 
 
 def authorize_static_html(filename: str, user: dict):
+    if has_role(user.get("role"), "RUNTIME_REVIEWER", "RUNTIME_REAPER"):
+        raise HTTPException(status_code=403, detail="Access denied")
     allowed_roles = STATIC_HTML_ROLES.get(filename)
     if allowed_roles and not has_role(user.get("role"), *allowed_roles):
         raise HTTPException(status_code=403, detail="Access denied")
@@ -57,6 +70,38 @@ app = FastAPI(
 )
 app.add_middleware(AuthorizationMiddleware)
 
+
+@app.exception_handler(StarletteHTTPException)
+async def handle_http_error(_request: Request, error: StarletteHTTPException):
+    message = error.detail if isinstance(error.detail, str) else "Request failed"
+    return api_error_response(
+        error.status_code,
+        api_error_code(error.status_code),
+        message,
+        detail=error.detail,
+        headers=error.headers,
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def handle_validation_error(_request: Request, error: RequestValidationError):
+    return api_error_response(
+        422,
+        "validation_error",
+        "Request validation failed",
+        detail=error.errors(),
+    )
+
+
+@app.exception_handler(Exception)
+async def handle_unexpected_error(_request: Request, error: Exception):
+    logger.error("Unhandled API error", exc_info=(type(error), error, error.__traceback__))
+    return api_error_response(
+        500,
+        "internal_error",
+        "An unexpected error occurred.",
+    )
+
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(requirements_router)
@@ -70,6 +115,9 @@ app.include_router(operations_router)
 app.include_router(workforce_router)
 app.include_router(runtime_router)
 app.include_router(tasks_router)
+app.include_router(admin_users_router)
+app.include_router(workforce_management_router)
+app.include_router(execution_management_router)
 
 
 @app.middleware("http")
@@ -77,7 +125,7 @@ async def same_origin_mutations(request: Request, call_next):
     if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
         origin = request.headers.get("origin")
         if origin and origin != f"{request.url.scheme}://{request.url.netloc}":
-            return JSONResponse(status_code=403, content={"detail": "Cross-origin request denied"})
+            return api_error_response(403, "access_denied", "Cross-origin request denied", detail="Cross-origin request denied")
     return await call_next(request)
 
 
@@ -147,9 +195,29 @@ def admin_control_center_page(_user=Depends(require_roles("PLATFORM_OWNER"))):
     return FileResponse(STATIC_DIR / "admin-control-center.html")
 
 
+@app.get("/user-management", include_in_schema=False)
+def user_management_page(_user=Depends(require_roles("PLATFORM_OWNER"))):
+    return FileResponse(STATIC_DIR / "user-management.html")
+
+
+@app.get("/workforce-management", include_in_schema=False)
+def workforce_management_page(_user=Depends(require_roles("WORKFORCE_MANAGER", "PLATFORM_OWNER"))):
+    return FileResponse(STATIC_DIR / "workforce-management.html")
+
+
+@app.get("/execution-management", include_in_schema=False)
+def execution_management_page(_user=Depends(require_roles("WORKFORCE_MANAGER", "PLATFORM_OWNER"))):
+    return FileResponse(STATIC_DIR / "execution-management.html")
+
+
 @app.get("/profile", include_in_schema=False)
 def profile_page(_user=Depends(get_current_user)):
     return FileResponse(STATIC_DIR / "profile.html")
+
+
+@app.get("/password-reset", include_in_schema=False)
+def password_reset_page(_user=Depends(get_current_user)):
+    return FileResponse(STATIC_DIR / "password-reset.html")
 
 
 @app.get("/static/{asset_path:path}", include_in_schema=False)

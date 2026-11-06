@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Workforce Management | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css">
+    <style>
+        body{margin:0;background:#f4f7f5;color:#182a24;font:15px/1.5 system-ui,sans-serif}
+        main{max-width:1180px;margin:2rem auto;padding:0 1rem}
+        header{display:flex;justify-content:space-between;align-items:center;padding:1rem max(1rem,calc((100% - 1180px)/2));background:#173c33;color:white}
+        header a{color:white;margin-left:1rem}
+        h1{margin-bottom:.25rem}.muted{color:#60736b}
+        .tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:1.5rem 0}
+        button,.button{border:0;border-radius:6px;padding:.65rem .9rem;background:#17664f;color:white;cursor:pointer}
+        button.secondary{background:#e2ebe6;color:#173c33}
+        .tabs button[aria-pressed=true]{background:#173c33}
+        .panel{background:white;border:1px solid #dce5df;border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+        .panel[hidden]{display:none}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem}
+        label{display:block;font-weight:600}input,select,textarea{box-sizing:border-box;width:100%;margin-top:.3rem;padding:.65rem;border:1px solid #bdcbc3;border-radius:5px;font:inherit}
+        textarea{min-height:320px;font-family:ui-monospace,monospace;font-size:.85rem}
+        .form-actions{display:flex;gap:.5rem;align-items:end;margin-top:1rem}
+        .status{padding:.75rem 1rem;border-radius:6px;background:#e8f1ec;margin:1rem 0}
+        .status.error{background:#ffeded;color:#842525}.card{border:1px solid #dce5df;border-radius:8px;padding:1rem;margin:.75rem 0}
+        .card h3{margin:.1rem 0}.card p{margin:.4rem 0}.table-wrap{overflow:auto}
+        table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:.65rem;border-bottom:1px solid #e4eae6;vertical-align:top}
+        pre{white-space:pre-wrap;overflow-wrap:anywhere}code{background:#eef3f0;padding:.1rem .25rem}
+        @media(max-width:600px){header{display:block}header nav{margin-top:.6rem}main{margin:1rem auto}.form-actions{align-items:stretch;flex-direction:column}}
+    </style>
+    <script src="/static/workforce-management.js" defer></script>
+</head>
+<body>
+    <header>
+        <strong>Workforce Management</strong>
+        <nav aria-label="Workspace navigation"><a href="/dashboard">Workspace</a><a href="/static/admin-control-center.html">Admin center</a></nav>
+    </header>
+    <main>
+        <h1>Workforce & delivery planning</h1>
+        <p class="muted">Manage availability, review evidence, plan project backlogs, and route recommendations for manager approval. Recommendations never create assignments automatically.</p>
+        <div id="status" class="status" role="status" aria-live="polite">Loading workforce records…</div>
+        <nav class="tabs" aria-label="Workforce tools">
+            <button type="button" data-tab="capacity" aria-pressed="true">Capacity & readiness</button>
+            <button type="button" data-tab="evidence" aria-pressed="false">Evidence review</button>
+            <button type="button" data-tab="planning" aria-pressed="false">Project planning</button>
+            <button type="button" data-tab="assignments" aria-pressed="false">Assignment approvals</button>
+        </nav>
+        <section id="capacityPanel" class="panel" aria-label="Workforce capacity">
+            <h2>Weekly capacity</h2>
+            <p class="muted">Week starting <span id="weekStart">—</span>. Manager edits are limited to direct reports and self.</p>
+            <form id="capacityForm">
+                <div class="grid">
+                    <label>Workforce member<select id="capacityUser" required></select></label>
+                    <label>Available hours<input id="availableHours" type="number" min="0" max="168" step="0.5" required></label>
+                    <label>Availability<select id="isAvailable"><option value="true">Available</option><option value="false">Unavailable</option></select></label>
+                    <label>Note<input id="availabilityNote" maxlength="500"></label>
+                </div>
+                <div class="form-actions"><button type="submit">Save availability</button><button type="button" class="secondary" id="refreshCapacity">Refresh records</button></div>
+            </form>
+            <div id="capacityTable" class="table-wrap"></div>
+        </section>
+        <section id="evidencePanel" class="panel" aria-label="Evidence review" hidden>
+            <h2>Pending evidence review</h2>
+            <p class="muted">Reviewing skill and certification evidence changes workforce readiness. Expired certifications cannot be approved.</p>
+            <form id="certificationForm">
+                <h3>Submit certification evidence</h3>
+                <div class="grid">
+                    <label>Workforce member<select id="certificationUser" required></select></label>
+                    <label>Certification<input id="certificationName" maxlength="200" required></label>
+                    <label>Issuer<input id="certificationIssuer" maxlength="200"></label>
+                    <label>Expiry date<input id="certificationExpiry" type="date"></label>
+                    <label>Evidence reference<input id="certificationEvidence" minlength="10" maxlength="2000" required placeholder="Evidence URI or verification details"></label>
+                </div>
+                <p><button type="submit">Submit for manager review</button></p>
+            </form>
+            <div id="pendingSkills"></div>
+            <div id="pendingCertifications"></div>
+        </section>
+        <section id="planningPanel" class="panel" aria-label="Project backlog planning" hidden>
+            <h2>Create a project backlog</h2>
+            <p class="muted">This creates epics, features, stories, sprints, and tasks once per project. Replace the JSON example with the approved plan.</p>
+            <form id="backlogForm">
+                <label>Project ID<input id="projectId" required placeholder="Project UUID"></label>
+                <label>Backlog JSON<textarea id="backlogJson" spellcheck="false" required></textarea></label>
+                <div class="form-actions"><button type="submit">Save project backlog</button><button type="button" class="secondary" id="loadBacklog">Load existing backlog</button></div>
+            </form>
+            <div id="backlogResult"></div>
+        </section>
+        <section id="assignmentsPanel" class="panel" aria-label="Assignment recommendations" hidden>
+            <h2>Recommendation & approval</h2>
+            <p class="muted">Generate a ranked recommendation for a planned task. Only the candidate's assigned manager may approve, and approval is required before assignment.</p>
+            <form id="recommendationForm">
+                <label>Planned task ID<input id="taskId" required placeholder="Project task UUID"></label>
+                <div class="form-actions"><button type="submit">Generate recommendations</button><button type="button" class="secondary" id="refreshApprovals">Refresh approvals</button></div>
+            </form>
+            <div id="recommendationResult"></div>
+            <h3>Awaiting manager decision</h3>
+            <div id="pendingRecommendations"></div>
+        </section>
+    </main>
+</body>
+</html>

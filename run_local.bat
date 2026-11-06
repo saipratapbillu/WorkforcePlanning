@@ -2,6 +2,17 @@
 setlocal
 cd /d "%~dp0"
 
+if not exist ".env" (
+    if not exist ".env.example" (
+        echo ERROR: .env.example is missing.
+        exit /b 1
+    )
+    copy ".env.example" ".env" >nul
+    echo Created .env from .env.example. Review its settings before continuing.
+)
+
+if not defined PORT set "PORT=8000"
+
 title AI Company Phase 2
 
 echo ========================================================
@@ -174,7 +185,7 @@ echo Press CTRL+C to stop AI Company.
 echo ========================================================
 echo.
 
-".venv\Scripts\python.exe" -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+".venv\Scripts\python.exe" -m uvicorn app.main:app --reload --host 127.0.0.1 --port %PORT%
 
 echo.
 echo AI Company stopped.

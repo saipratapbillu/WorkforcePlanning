@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Delivery Execution | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css">
+    <style>
+        body{margin:0;background:#f4f7f5;color:#182a24;font:15px/1.5 system-ui,sans-serif}
+        main{max-width:1180px;margin:2rem auto;padding:0 1rem}
+        header{display:flex;justify-content:space-between;align-items:center;padding:1rem max(1rem,calc((100% - 1180px)/2));background:#173c33;color:white}
+        header a{color:white;margin-left:1rem}
+        .muted{color:#60736b}
+        button{border:0;border-radius:6px;padding:.5rem .8rem;background:#17664f;color:white;cursor:pointer;margin:.15rem}
+        button.secondary{background:#e2ebe6;color:#173c33}
+        .panel{background:white;border:1px solid #dce5df;border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+        label{display:block;font-weight:600}input,select{box-sizing:border-box;width:100%;margin-top:.3rem;padding:.55rem;border:1px solid #bdcbc3;border-radius:5px;font:inherit}
+        .status{padding:.75rem 1rem;border-radius:6px;background:#e8f1ec;margin:1rem 0}
+        .status.error{background:#ffeded;color:#842525}
+        table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:.5rem;border-bottom:1px solid #e4eae6;vertical-align:top}
+        .bar{background:#e4eae6;border-radius:4px;height:10px;min-width:100px}.bar>div{background:#17664f;height:10px;border-radius:4px}
+        .OnTrack{color:#17664f}.AtRisk{color:#b26a00}.Behind,.Overloaded{color:#842525}
+        .table-wrap{overflow:auto}
+    </style>
+    <script src="/static/execution-management.js" defer></script>
+</head>
+<body>
+    <header>
+        <strong>Delivery Execution</strong>
+        <nav aria-label="Workspace navigation"><a href="/dashboard">Workspace</a><a href="/workforce-management">Workforce</a></nav>
+    </header>
+    <main>
+        <h1>Project execution &amp; dashboard</h1>
+        <p class="muted">Epics, features, stories, sprints and backlog. Task assignment is never automatic: it requires a manager-approved recommendation.</p>
+        <div id="status" class="status" role="status">Enter a project ID to begin.</div>
+        <section class="panel">
+            <div class="grid">
+                <label>Project ID<input id="project-id" autocomplete="off"></label>
+                <div><br><button id="load" type="button">Load project</button></div>
+            </div>
+        </section>
+        <section class="panel"><h2>Epic progress</h2><div class="table-wrap"><table><thead><tr><th>Epic</th><th>Status</th><th>Stories</th><th>Progress</th><th>Actions</th></tr></thead><tbody id="epics"></tbody></table></div>
+            <form id="epic-form" class="grid"><label>New epic title<input name="title" required minlength="3" maxlength="200"></label><label>Description<input name="description" required maxlength="2000"></label><div><br><button>Create epic</button></div></form>
+        </section>
+        <section class="panel"><h2>Story progress</h2><div id="story-summary" class="muted"></div></section>
+        <section class="panel"><h2>Sprint health</h2><div class="table-wrap"><table><thead><tr><th>Sprint</th><th>Status</th><th>Health</th><th>Points</th><th>Capacity</th><th>Actions</th></tr></thead><tbody id="sprints"></tbody></table></div>
+            <form id="sprint-form" class="grid"><label>Name<input name="name" required maxlength="100"></label><label>Start<input name="start_date" type="date" required></label><label>End<input name="end_date" type="date" required></label><label>Capacity (h)<input name="capacity_hours" type="number" min="0" step="0.5" required></label><div><br><button>Create sprint</button></div></form>
+        </section>
+        <section class="panel"><h2>Prioritized backlog</h2><div class="table-wrap"><table><thead><tr><th>Story</th><th>Status</th><th>Priority</th><th>Points</th><th>Open deps</th><th>Actions</th></tr></thead><tbody id="backlog"></tbody></table></div></section>
+    </main>
+</body>
+</html>

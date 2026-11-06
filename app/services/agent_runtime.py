@@ -12,6 +12,8 @@ from sqlalchemy import text
 MAX_OUTPUT_CHARS = 500_000
 LEASE_MINUTES = 10
 MAX_ATTEMPTS = 3
+REVIEW_LEASE_MINUTES = 5
+MAX_REVIEW_ATTEMPTS = 3
 
 
 def utcnow():
@@ -293,6 +295,7 @@ def claim_next_task(db, agent_id, actor_id):
     attempt = int(row["AttemptCount"]) + 1
     execution_id = uuid.uuid4()
     lease_expiry = now + timedelta(minutes=LEASE_MINUTES)
+    context = _task_context(db, row["TaskID"], row["QueueID"], attempt)
     db.execute(text("""
         UPDATE AgentTaskQueue SET Status='Executing',AttemptCount=:attempt,LeaseOwner=:agent,
             LeaseExpiresAtUtc=:expires,ModifiedAtUtc=:now
@@ -309,16 +312,70 @@ def claim_next_task(db, agent_id, actor_id):
         "execution_id": execution_id, "queue_id": row["QueueID"], "task_id": row["TaskID"],
         "agent_id": agent_id, "attempt": attempt, "correlation": uuid.uuid4(),
         "input": json.dumps({"description": row["Description"], "required_role": row["RequiredRoleCode"],
-                              "priority": row["Priority"], "risk_level": row["RiskLevel"]}),
+                              "priority": row["Priority"], "risk_level": row["RiskLevel"],
+                              "correction_context": context}, default=str),
         "now": now,
     })
+    if context["open_defects"]:
+        db.execute(text("""
+            UPDATE AgentRuntimeDefect SET Status='InProgress'
+            WHERE TaskID=:task_id AND Status='Open'
+        """), {"task_id": row["TaskID"]})
     _runtime_event(db, event_type="TaskClaimed", actor_type="Agent", actor_id=agent_id,
                    severity="Info", execution_id=execution_id, queue_id=row["QueueID"],
                    task_id=row["TaskID"], agent_id=agent_id, details={"attempt": attempt})
     return {"execution_id": str(execution_id), "queue_id": str(row["QueueID"]), "task_id": str(row["TaskID"]),
             "attempt": attempt, "lease_expires_at_utc": lease_expiry.isoformat(),
             "task": {"description": row["Description"], "required_role": row["RequiredRoleCode"],
-                     "priority": row["Priority"], "risk_level": row["RiskLevel"]}}
+                     "priority": row["Priority"], "risk_level": row["RiskLevel"]},
+            "context": context}
+
+
+def _task_context(db, task_id, queue_id, attempt):
+    """Requirement, previous-attempt reference and open defects for one task (read only)."""
+    requirement = db.execute(text("""
+        SELECT r.RequirementID,r.Title,r.Description
+        FROM Task t JOIN Project p ON p.ProjectID=t.ProjectID
+        JOIN Requirement r ON r.RequirementID=p.RequirementID
+        WHERE t.TaskID=:task_id
+    """), {"task_id": task_id}).mappings().first()
+    previous = db.execute(text("""
+        SELECT TOP 1 e.ExecutionID,e.AttemptNumber,o.OutputID,o.Sha256
+        FROM AgentExecution e
+        LEFT JOIN AgentExecutionOutput o ON o.ExecutionID=e.ExecutionID
+        WHERE e.QueueID=:queue_id AND e.AttemptNumber<:attempt
+        ORDER BY e.AttemptNumber DESC,o.CreatedAtUtc DESC
+    """), {"queue_id": queue_id, "attempt": attempt}).mappings().first()
+    defects = db.execute(text("""
+        SELECT DefectID,ExecutionID,Severity,RootCause,BusinessImpact,TechnicalImpact,FixRecommendation
+        FROM AgentRuntimeDefect
+        WHERE TaskID=:task_id AND Status IN ('Open','InProgress','Retest')
+        ORDER BY CreatedAtUtc
+    """), {"task_id": task_id}).mappings().all()
+    return {
+        "requirement": {"id": str(requirement["RequirementID"]), "title": requirement["Title"],
+                        "description": requirement["Description"]} if requirement else None,
+        "previous_attempt": {"attempt": int(previous["AttemptNumber"]), "execution_id": str(previous["ExecutionID"]),
+                             "output_id": str(previous["OutputID"]) if previous["OutputID"] else None,
+                             "sha256": previous["Sha256"]} if previous else None,
+        "open_defects": [{k: str(v) for k, v in d.items()} for d in defects],
+    }
+
+
+def get_worker_context(db, execution_id, agent_id):
+    """Context only for the execution this agent currently holds a valid lease on."""
+    row = db.execute(text("""
+        SELECT e.QueueID,e.TaskID,e.AttemptNumber,q.LeaseExpiresAtUtc
+        FROM AgentExecution e
+        JOIN AgentTaskQueue q ON q.QueueID=e.QueueID
+        JOIN Task t ON t.TaskID=e.TaskID
+        WHERE e.ExecutionID=:id AND e.AgentID=:agent AND e.Status='Executing'
+          AND q.Status='Executing' AND q.LeaseOwner=:agent_text
+          AND q.LeaseExpiresAtUtc>:now AND t.AssignedAgentID=:agent
+    """), {"id": execution_id, "agent": agent_id, "agent_text": str(agent_id), "now": utcnow()}).mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Execution not found for this agent lease")
+    return _task_context(db, row["TaskID"], row["QueueID"], int(row["AttemptNumber"]))
 
 
 def _create_escalation(db, queue_row, agent_id, code, reason, actor_id):
@@ -398,6 +455,10 @@ def submit_output(db, execution_id, agent_id, name, content_type, content, actor
           "evidence": json.dumps({"output_id": str(output_id), "sha256": digest,
                                   "scope": "structural only; independent QA still required"}), "created_at": now})
     db.execute(text("""
+        UPDATE AgentRuntimeDefect SET Status='Retest'
+        WHERE TaskID=:task_id AND Status='InProgress'
+    """), {"task_id": execution["TaskID"]})
+    db.execute(text("""
         UPDATE AgentExecution SET Status='Review',CompletedAtUtc=:now,HeartbeatAtUtc=:now
         WHERE ExecutionID=:execution_id
     """), {"now": now, "execution_id": execution_id})
@@ -414,22 +475,120 @@ def submit_output(db, execution_id, agent_id, name, content_type, content, actor
     return {"output_id": str(output_id), "sha256": digest, "status": "Review", "structural_qa": "passed", "independent_qa": "pending"}
 
 
-def review_execution(db, execution_id, reviewer_id, passed, reason, defect=None):
+def _assert_independent(db, task_id, reviewer_id):
+    """Reviewer must hold RUNTIME_REVIEWER and must not be a recorded creator of the work.
+
+    Fails closed when creator identity is unknown (NULL). Agent IDs are never compared with user IDs.
+    """
+    role = db.execute(text("""
+        SELECT r.RoleCode FROM AppUser u JOIN Role r ON r.RoleID=u.RoleID
+        WHERE u.UserID=:id AND u.IsActive=1 AND r.IsActive=1
+    """), {"id": reviewer_id}).scalar_one_or_none()
+    if str(role or "").upper() != "RUNTIME_REVIEWER":
+        raise HTTPException(status_code=403, detail="Active RUNTIME_REVIEWER role required")
+    creators = db.execute(text("""
+        SELECT t.CreatedByUserID AS TaskCreator,p.CreatedByUserID AS ProjectCreator,
+               r.CreatedByUserID AS RequirementCreator
+        FROM Task t JOIN Project p ON p.ProjectID=t.ProjectID
+        LEFT JOIN Requirement r ON r.RequirementID=p.RequirementID
+        WHERE t.TaskID=:task_id
+    """), {"task_id": task_id}).mappings().first()
+    if not creators:
+        raise HTTPException(status_code=403, detail="Work provenance cannot be established; review denied")
+    values = [creators["TaskCreator"], creators["ProjectCreator"], creators["RequirementCreator"]]
+    if any(v is None for v in values):
+        raise HTTPException(status_code=403, detail="Creator identity is unknown; independent review denied (fail closed)")
+    if any(str(v).lower() == str(reviewer_id).lower() for v in values):
+        raise HTTPException(status_code=403, detail="Reviewer created this work and cannot review it")
+
+
+def claim_review(db, reviewer_id):
+    """Atomically lease the next execution awaiting review (UPDLOCK,READPAST on the execution row)."""
+    now = utcnow()
+    row = db.execute(text("""
+        SELECT TOP 1 e.ExecutionID,e.TaskID,e.ReviewAttempt
+        FROM AgentExecution e WITH (UPDLOCK,READPAST,ROWLOCK)
+        JOIN Task t ON t.TaskID=e.TaskID
+        JOIN Project p ON p.ProjectID=t.ProjectID
+        LEFT JOIN Requirement r ON r.RequirementID=p.RequirementID
+        WHERE e.Status='Review' AND e.ReviewDecision IS NULL
+          AND (e.ReviewOwnerUserID IS NULL OR e.ReviewLeaseExpiresAtUtc<:now)
+          AND t.CreatedByUserID IS NOT NULL AND p.CreatedByUserID IS NOT NULL
+          AND r.CreatedByUserID IS NOT NULL
+          AND t.CreatedByUserID<>:reviewer_id
+          AND p.CreatedByUserID<>:reviewer_id
+          AND r.CreatedByUserID<>:reviewer_id
+        ORDER BY e.CompletedAtUtc
+    """), {"now": now, "reviewer_id": reviewer_id}).mappings().first()
+    if not row:
+        return None
+    expires = now + timedelta(minutes=REVIEW_LEASE_MINUTES)
+    db.execute(text("""
+        UPDATE AgentExecution SET ReviewOwnerUserID=:owner,ReviewLeaseExpiresAtUtc=:expires,
+            ReviewAttempt=ReviewAttempt+1
+        WHERE ExecutionID=:id
+    """), {"owner": reviewer_id, "expires": expires, "id": row["ExecutionID"]})
+    _assert_independent(db, row["TaskID"], reviewer_id)
+    _runtime_event(db, event_type="ReviewLeaseClaimed", actor_type="User", actor_id=reviewer_id,
+                   execution_id=row["ExecutionID"], task_id=row["TaskID"],
+                   details={"review_attempt": int(row["ReviewAttempt"]) + 1, "lease_expires_at": expires.isoformat()})
+    return {"execution_id": str(row["ExecutionID"]), "review_lease_expires_at_utc": expires.isoformat()}
+
+
+def get_review_package(db, execution_id, reviewer_id):
+    """Review material, only for the current lease owner."""
+    row = db.execute(text("""
+        SELECT e.ExecutionID,e.TaskID,e.AttemptNumber,e.QueueID
+        FROM AgentExecution e
+        WHERE e.ExecutionID=:id AND e.Status='Review' AND e.ReviewOwnerUserID=:reviewer
+          AND e.ReviewLeaseExpiresAtUtc>:now
+    """), {"id": execution_id, "reviewer": reviewer_id, "now": utcnow()}).mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="No active review lease for this execution")
+    outputs = db.execute(text("""
+        SELECT OutputID,OutputName,ContentType,Content,Sha256 FROM AgentExecutionOutput WHERE ExecutionID=:id
+    """), {"id": execution_id}).mappings().all()
+    context = _task_context(db, row["TaskID"], row["QueueID"], int(row["AttemptNumber"]))
+    return {"execution_id": str(execution_id), "attempt": int(row["AttemptNumber"]),
+            "outputs": [{"output_id": str(o["OutputID"]), "name": o["OutputName"], "content_type": o["ContentType"],
+                         "content": o["Content"], "sha256": o["Sha256"]} for o in outputs],
+            "context": context}
+
+
+def review_execution(db, execution_id, reviewer_id, passed, reason, defect=None, review_key=None, require_lease=False):
     execution = db.execute(text("""
          SELECT e.ExecutionID,e.QueueID,e.TaskID,e.AgentID,e.Status,q.AttemptCount,q.MaxAttempts,
-               q.Status AS QueueStatus,t.ProjectID,t.RequiredRoleCode,t.RiskLevel
+               q.Status AS QueueStatus,t.ProjectID,t.RequiredRoleCode,t.RiskLevel,
+               e.ReviewKey,e.ReviewDecision,e.ReviewOwnerUserID,e.ReviewLeaseExpiresAtUtc
         FROM AgentExecution e WITH (UPDLOCK,ROWLOCK)
         JOIN AgentTaskQueue q ON q.QueueID=e.QueueID JOIN Task t ON t.TaskID=e.TaskID
         WHERE e.ExecutionID=:execution_id
     """), {"execution_id": execution_id}).mappings().first()
+    if (execution and review_key and execution["ReviewKey"] == review_key
+            and execution["ReviewDecision"] is not None):
+        if (execution["ReviewDecision"] == "Approved") != bool(passed):
+            raise HTTPException(status_code=409, detail="Review key already used with a different decision")
+        return {"execution_id": str(execution_id), "passed": execution["ReviewDecision"] == "Approved",
+                "status": execution["Status"], "idempotent_replay": True}
     if not execution or execution["Status"] != "Review" or execution["QueueStatus"] != "Review":
         raise HTTPException(status_code=409, detail="Execution is not awaiting independent QA review")
+    if require_lease:
+        if (not execution["ReviewOwnerUserID"] or str(execution["ReviewOwnerUserID"]).lower() != str(reviewer_id).lower()
+                or not execution["ReviewLeaseExpiresAtUtc"] or execution["ReviewLeaseExpiresAtUtc"] < utcnow()):
+            raise HTTPException(status_code=409, detail="Review lease is not held by this reviewer or has expired")
+        _assert_independent(db, execution["TaskID"], reviewer_id)
+        if not review_key:
+            raise HTTPException(status_code=422, detail="review_key is required")
     if not reason or not reason.strip():
         raise HTTPException(status_code=422, detail="A review rationale is required")
-    if str(reviewer_id) == str(execution["AgentID"]):
-        raise HTTPException(status_code=403, detail="Originating agent cannot independently review its own output")
     enqueue_result = {"queued_count": 0, "blocked_count": 0}
     now = utcnow()
+    db.execute(text("""
+        UPDATE AgentExecution SET ReviewDecision=:decision,ReviewKey=:key,ReviewOwnerUserID=:owner,
+            ReviewLeaseExpiresAtUtc=NULL
+        WHERE ExecutionID=:id
+    """), {"decision": "Approved" if passed else "Rejected", "key": review_key,
+           "owner": reviewer_id if require_lease else execution["ReviewOwnerUserID"], "id": execution_id})
     db.execute(text("""
         INSERT Evaluation(EvaluationID,AgentID,TaskID,EvaluationType,Score,Passed,Evidence,CreatedAtUtc)
         VALUES(:id,:agent_id,:task_id,'IndependentQA',:score,:passed,:evidence,:now)
@@ -437,14 +596,21 @@ def review_execution(db, execution_id, reviewer_id, passed, reason, defect=None)
           "score": 100 if passed else 0, "passed": passed,
           "evidence": json.dumps({"reviewer": str(reviewer_id), "reason": reason.strip()}), "now": now})
     if passed:
-        output = db.execute(text("""
-            SELECT TOP 1 OutputID,OutputName,Sha256
+        outputs = db.execute(text("""
+            SELECT OutputID,OutputName,Content,Sha256
             FROM AgentExecutionOutput
             WHERE ExecutionID=:execution_id
-            ORDER BY CreatedAtUtc DESC,OutputID
-        """), {"execution_id": execution_id}).mappings().first()
-        if not output:
+        """), {"execution_id": execution_id}).mappings().all()
+        if not outputs:
             raise HTTPException(status_code=409, detail="Execution has no stored output to accept as a deliverable")
+        if len(outputs) != 1:
+            raise HTTPException(status_code=409, detail="Exactly one output is required for approval")
+        output = outputs[0]
+        if hashlib.sha256((output["Content"] or "").encode("utf-8")).hexdigest() != output["Sha256"]:
+            raise HTTPException(status_code=409, detail="Stored output hash does not match its content")
+        artifact_uri = f"agent-execution-output:{output['OutputID']}"
+        if db.execute(text("SELECT 1 FROM Deliverable WHERE ArtifactUri=:uri"), {"uri": artifact_uri}).first():
+            raise HTTPException(status_code=409, detail="A deliverable already exists for this output")
         db.execute(text("""
             INSERT Deliverable(DeliverableID,ProjectID,TaskID,Name,ArtifactUri,ArtifactHash,Status)
             VALUES(:deliverable_id,:project_id,:task_id,:name,:artifact_uri,:artifact_hash,'Accepted')
@@ -453,7 +619,7 @@ def review_execution(db, execution_id, reviewer_id, passed, reason, defect=None)
             "project_id": execution["ProjectID"],
             "task_id": execution["TaskID"],
             "name": output["OutputName"],
-            "artifact_uri": f"agent-execution-output:{output['OutputID']}",
+            "artifact_uri": artifact_uri,
             "artifact_hash": output["Sha256"],
         })
         db.execute(text("UPDATE AgentExecution SET Status='Completed' WHERE ExecutionID=:id"), {"id": execution_id})
@@ -536,6 +702,10 @@ def review_execution(db, execution_id, reviewer_id, passed, reason, defect=None)
             """), {"reason": failure, "now": now, "id": execution["QueueID"]})
             db.execute(text("UPDATE Task SET Status='Blocked' WHERE TaskID=:task_id"), {"task_id": execution["TaskID"]})
             _create_escalation(db, execution, execution["AgentID"], "QA_RETRY_LIMIT", failure, reviewer_id)
+            db.execute(text("""
+                UPDATE AgentRuntimeDefect SET Status='Escalated'
+                WHERE TaskID=:task_id AND Status IN ('Open','InProgress','Retest')
+            """), {"task_id": execution["TaskID"]})
     _runtime_event(db, event_type="IndependentQAReview", actor_type="User", actor_id=reviewer_id,
                    severity="Info" if passed else "Warning", execution_id=execution_id,
                    queue_id=execution["QueueID"], task_id=execution["TaskID"], agent_id=execution["AgentID"],
@@ -599,7 +769,37 @@ def reap_expired_leases(db, actor_id="runtime-reaper"):
     """), {"now": now}).mappings().all()
     for execution in expired:
         _retry_or_escalate(db, execution, "Execution heartbeat lease expired", "System", actor_id)
-    return {"expired_lease_count": len(expired)}
+    stale = db.execute(text("""
+        SELECT e.ExecutionID,e.QueueID,e.TaskID,e.AgentID,e.ReviewAttempt,q.AttemptCount,q.MaxAttempts
+        FROM AgentExecution e WITH (UPDLOCK,READPAST,ROWLOCK)
+        JOIN AgentTaskQueue q ON q.QueueID=e.QueueID
+        WHERE e.Status='Review' AND e.ReviewDecision IS NULL AND e.ReviewOwnerUserID IS NOT NULL
+          AND e.ReviewLeaseExpiresAtUtc<:now
+    """), {"now": now}).mappings().all()
+    for execution in stale:
+        db.execute(text("""
+            UPDATE AgentExecution SET ReviewOwnerUserID=NULL,ReviewLeaseExpiresAtUtc=NULL WHERE ExecutionID=:id
+        """), {"id": execution["ExecutionID"]})
+        _runtime_event(db, event_type="ReviewLeaseExpired", actor_type="System", actor_id=actor_id,
+                       severity="Warning", execution_id=execution["ExecutionID"], queue_id=execution["QueueID"],
+                       task_id=execution["TaskID"], agent_id=execution["AgentID"],
+                       details={"review_attempt": int(execution["ReviewAttempt"])})
+        if int(execution["ReviewAttempt"]) >= MAX_REVIEW_ATTEMPTS:
+            db.execute(text("""
+                UPDATE AgentExecution SET Status='Escalated',FailureReason='Review lease timeout' WHERE ExecutionID=:id
+            """), {"id": execution["ExecutionID"]})
+            db.execute(text("""
+                UPDATE AgentTaskQueue SET Status='Escalated',LastFailure='Review lease timeout',
+                    EscalatedAtUtc=:now,ModifiedAtUtc=:now WHERE QueueID=:id
+            """), {"now": now, "id": execution["QueueID"]})
+            db.execute(text("UPDATE Task SET Status='Blocked' WHERE TaskID=:id"), {"id": execution["TaskID"]})
+            db.execute(text("""
+                UPDATE AgentRuntimeDefect SET Status='Escalated'
+                WHERE TaskID=:id AND Status IN ('Open','InProgress','Retest')
+            """), {"id": execution["TaskID"]})
+            _create_escalation(db, execution, execution["AgentID"], "REVIEW_TIMEOUT",
+                               "Independent review lease expired repeatedly", actor_id)
+    return {"expired_lease_count": len(expired), "expired_review_lease_count": len(stale)}
 
 
 def _retry_or_escalate(db, execution, reason, actor_type, actor_id):

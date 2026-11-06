@@ -14,6 +14,9 @@ from app.services.agent_runtime import (
     _execution_gate,
     _runtime_event,
     claim_next_task,
+    claim_review,
+    get_review_package,
+    get_worker_context,
     enqueue_ready_tasks,
     fail_execution,
     hash_worker_token,
@@ -28,9 +31,11 @@ from app.services.agent_runtime import (
 router = APIRouter(prefix="/runtime", tags=["Agent Runtime"])
 ADMIN_ROLES = ("ADMIN", "OWNER", "SUPER_ADMIN")
 OWNER_ROLES = ("OWNER", "SUPER_ADMIN")
+REVIEWER_ROLES = ("RUNTIME_REVIEWER",)
 
 
 class ReviewRequest(BaseModel):
+    review_key: str = Field(min_length=8, max_length=100)
     passed: bool
     reason: str = Field(min_length=5, max_length=2000)
     severity: Literal["Low", "Medium", "High", "Critical"] = "High"
@@ -247,12 +252,25 @@ def list_runtime_defects(status: str | None = None, db: Session = Depends(get_db
     return [dict(row) for row in rows]
 
 
-@router.post("/executions/{execution_id}/review", dependencies=[Depends(require_roles(*ADMIN_ROLES))])
+@router.post("/reviews/claim", dependencies=[Depends(require_roles(*REVIEWER_ROLES))])
+def claim_runtime_review(db: Session = Depends(get_db), user=Depends(require_roles(*REVIEWER_ROLES))):
+    result = claim_review(db, UUID(str(user["sub"])))
+    db.commit()
+    return result or {"execution_id": None}
+
+
+@router.get("/reviews/{execution_id}", dependencies=[Depends(require_roles(*REVIEWER_ROLES))])
+def read_runtime_review(execution_id: UUID, db: Session = Depends(get_db),
+                        user=Depends(require_roles(*REVIEWER_ROLES))):
+    return get_review_package(db, execution_id, UUID(str(user["sub"])))
+
+
+@router.post("/reviews/{execution_id}/decision", dependencies=[Depends(require_roles(*REVIEWER_ROLES))])
 def review_runtime_execution(
     execution_id: UUID,
     body: ReviewRequest,
     db: Session = Depends(get_db),
-    user=Depends(require_roles(*ADMIN_ROLES)),
+    user=Depends(require_roles(*REVIEWER_ROLES)),
 ):
     defect = None
     if not body.passed:
@@ -263,10 +281,16 @@ def review_runtime_execution(
             SELECT 1 FROM WorkforceRoleProfile WHERE RoleCode=:role_code AND Status='Active'
         """), {"role_code": body.assigned_role_code}).first():
             raise HTTPException(status_code=422, detail="Assigned remediation role is not an active role profile")
-        defect = body.model_dump(exclude={"passed", "reason"})
-    result = review_execution(db, execution_id, user["sub"], body.passed, body.reason, defect)
+        defect = body.model_dump(exclude={"passed", "reason", "review_key"})
+    result = review_execution(db, execution_id, UUID(str(user["sub"])), body.passed, body.reason, defect,
+                              review_key=body.review_key, require_lease=True)
     db.commit()
     return result
+
+
+@router.get("/worker/executions/{execution_id}/context")
+def worker_context(execution_id: UUID, agent_id: UUID = Depends(_worker_agent), db: Session = Depends(get_db)):
+    return get_worker_context(db, execution_id, agent_id)
 
 
 @router.post("/worker/claim")

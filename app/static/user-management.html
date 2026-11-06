@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Super Admin User Management | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css">
+    <style>
+        *,*::before,*::after{box-sizing:border-box}
+        body{margin:0;background:#f4f7f5;color:#182a24;font:15px/1.5 system-ui,sans-serif}
+        header{display:flex;justify-content:space-between;align-items:center;padding:1rem max(1rem,calc((100% - 1180px)/2));background:#173c33;color:white}
+        header a{color:white;margin-left:1rem}main{max-width:1180px;margin:2rem auto;padding:0 1rem}
+        .panel{background:white;border:1px solid #dce5df;border-radius:10px;padding:1.25rem;margin:1rem 0}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr));gap:1rem}.grid>*{min-width:0}
+        label{display:block;min-width:0;font-weight:600}input,select{box-sizing:border-box;width:100%;max-width:100%;min-width:0;margin-top:.3rem;padding:.65rem;border:1px solid #bdcbc3;border-radius:5px;background:#fff;font:inherit}
+        button{border:0;border-radius:6px;padding:.55rem .75rem;background:#17664f;color:white;cursor:pointer;margin:.15rem}
+        button.secondary{background:#e2ebe6;color:#173c33}.status{padding:.75rem 1rem;border-radius:6px;background:#e8f1ec;margin:1rem 0}
+        .status.error{background:#ffeded;color:#842525}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}
+        th,td{text-align:left;padding:.65rem;border-bottom:1px solid #e4eae6;vertical-align:top}td.actions{min-width:290px}
+        .muted{color:#60736b}.danger{background:#8c2c2c}
+        .password-entry{display:flex;align-items:stretch}.password-entry input{min-width:0;margin:0}.password-toggle{display:grid;width:44px;min-width:44px;place-items:center;margin:0;padding:0;border:1px solid #bdcbc3;border-left:0;border-radius:0 5px 5px 0;background:#fff;color:#173c33}.password-toggle:focus-visible{outline:2px solid #17664f;outline-offset:2px}dialog{width:min(440px,calc(100vw - 32px));border:1px solid #bdcbc3;border-radius:6px;padding:1.25rem}dialog::backdrop{background:rgb(17 35 27 / 45%)}
+        @media(max-width:600px){header{display:block}header nav{margin-top:.6rem}main{margin:1rem auto}}
+    </style>
+    <script src="/static/user-management.js?v=20261106a" defer></script>
+    <script src="/static/password-toggle.js?v=20261106c" defer></script>
+</head>
+<body>
+    <header>
+        <strong>Super Admin · User Management</strong>
+        <nav aria-label="Workspace navigation"><a href="/dashboard">Workspace</a><a href="/static/workforce-management.html">Workforce planning</a></nav>
+    </header>
+    <main>
+        <h1>Users & access</h1>
+        <p class="muted">Provision accounts, manage roles and organization scope, review skill evidence, reset credentials, and disable access. Passwords are never displayed or returned.</p>
+        <div id="status" class="status" role="status" aria-live="polite">Loading users…</div>
+        <section class="panel">
+            <h2>Create a user</h2>
+            <form id="createForm">
+                <div class="grid">
+                    <label>Email<input id="email" type="email" maxlength="320" required autocomplete="off"></label>
+                    <label>Temporary password<div class="password-entry"><input id="password" type="password" minlength="4" maxlength="128" placeholder="Password" required autocomplete="new-password"><button type="button" class="password-toggle" data-password-toggle="password" aria-label="Show password" aria-pressed="false">Show</button></div></label>
+                    <label>Display name<input id="displayName" maxlength="200" required></label>
+                    <label>Role<select id="roleId" required><option value="">Loading roles…</option></select></label>
+                    <label>Department label (optional)<input id="department" maxlength="100"></label>
+                    <label>Manager (optional)<select id="managerId"><option value="">No manager</option></select></label>
+                    <label>Company (optional)<select id="companyId"><option value="">No organization assignment</option></select></label>
+                    <label>Department (optional)<select id="departmentId"><option value="">Select a company first</option></select></label>
+                    <label>Position (optional)<select id="positionId"><option value="">Select a department first</option></select></label>
+                </div>
+                <p><button type="submit">Create user</button></p>
+            </form>
+        </section>
+        <section class="panel">
+            <div class="grid">
+                <label>Search users<input id="search" type="search" maxlength="100" placeholder="Email or display name"></label>
+                <label>Account status<select id="activeFilter"><option value="">All</option><option value="true">Active</option><option value="false">Disabled</option></select></label>
+            </div>
+            <p><button type="button" id="refreshButton" class="secondary">Refresh users</button></p>
+            <div id="userTable" class="table-wrap"></div>
+        </section>
+    </main>
+    <dialog id="passwordResetDialog">
+        <form id="passwordResetForm">
+            <h2>Reset user password</h2>
+            <p id="passwordResetTarget" class="muted"></p>
+            <label>Temporary password<div class="password-entry"><input id="resetPasswordValue" type="password" minlength="4" maxlength="128" placeholder="Password" required autocomplete="new-password"><button type="button" class="password-toggle" data-password-toggle="resetPasswordValue" aria-label="Show password" aria-pressed="false">Show</button></div></label>
+            <p><button type="submit">Reset password</button><button type="button" id="cancelPasswordReset" class="secondary">Cancel</button></p>
+        </form>
+    </dialog>
+</body>
+</html>

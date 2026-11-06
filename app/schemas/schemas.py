@@ -65,8 +65,12 @@ class AssessmentResponse(BaseModel):
     assessment:CEOAssessmentResult
 
 class LoginRequest(BaseModel):
-    email: str
-    password: str
+    email: str = Field(min_length=3, max_length=255)
+    password: str = Field(min_length=4, max_length=128)
+
+class PasswordResetRequest(BaseModel):
+    current_password: str = Field(min_length=4, max_length=128)
+    new_password: str = Field(min_length=4, max_length=128)
 
 class LoginResponse(BaseModel):
     token: str
@@ -82,9 +86,9 @@ class UserCreate(BaseModel):
 
 class UserRegister(BaseModel):
 
-    first_name: str
-    last_name: str
-    email: str
+    first_name: str = Field(min_length=1, max_length=100)
+    last_name: str = Field(min_length=1, max_length=100)
+    email: str = Field(min_length=3, max_length=255)
 
     mobile_number: str | None = None
 
@@ -94,4 +98,4 @@ class UserRegister(BaseModel):
 
     office_location: str | None = None
 
-    password: str = Field(min_length=12, max_length=128)
+    password: str = Field(min_length=4, max_length=128)

@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import FileResponse
 from uuid import UUID
 from sqlalchemy.orm import Session
 
@@ -12,6 +15,7 @@ from app.services.security_service import SecurityService
 
 router = APIRouter(prefix="/approvals", tags=["Approvals"])
 service = ApprovalService()
+STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
 
 def serialize_approval(row, can_decide=False):
@@ -29,7 +33,9 @@ def serialize_approval(row, can_decide=False):
 
 
 @router.get("")
-def approvals(db: Session = Depends(get_db), user=Depends(get_current_user)):
+def approvals(request: Request, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    if "text/html" in request.headers.get("accept", ""):
+        return FileResponse(STATIC_DIR / "approval-center.html")
     rows = SecurityService(db).GetVisibleApprovals(user)
     return [
         {

@@ -18,8 +18,26 @@ async function fetchJson(url, options = {}) {
     } catch {
         throw new Error("Unable to connect to the service. Check your connection and try again.");
     }
-    if (!response.ok) throw new Error(userFacingApiError(response.status));
-    return response.json();
+    let payload;
+    try {
+        payload = await response.json();
+    } catch {
+        throw new Error(`The service returned an invalid response (HTTP ${response.status}).`);
+    }
+    if (!response.ok) {
+        throw new Error(payload?.error?.message || payload?.detail || userFacingApiError(response.status));
+    }
+    return payload;
+}
+
+function dashboardIcon(symbolId, className = "") {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", className);
+    svg.setAttribute("aria-hidden", "true");
+    const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+    use.setAttribute("href", `#${symbolId}`);
+    svg.append(use);
+    return svg;
 }
 
 async function loadProfile() {
@@ -34,12 +52,6 @@ async function loadProfile() {
             const allowedRoles = link.dataset.allowedRoles.split(",");
             link.hidden = !allowedRoles.includes(user.role);
         });
-        const projectsLink = document.getElementById("projectsNavigation");
-        if (projectsLink.hidden) {
-            projectsLink.hidden = false;
-            projectsLink.href = "#myProjects";
-            projectsLink.textContent = "▧ My projects";
-        }
         return user;
     } catch (error) {
         showDashboardError(error.message);
@@ -71,8 +83,14 @@ function renderRecordList(elementId, records, labelFor, emptyMessage) {
 
 async function loadDashboard(user) {
     try {
-        const dashboardUrl = user.role === "USER" ? "/dashboard/api/me" : "/dashboard/api";
-        const data = await fetchJson(dashboardUrl);
+        const isPersonalDashboard = ["USER", "BUSINESS_USER"].includes(user.role);
+        const data = await fetchJson(isPersonalDashboard ? "/dashboard/api/me" : "/dashboard/api");
+        if (!isPersonalDashboard) {
+            const personal = await fetchJson("/dashboard/api/me");
+            for (const key of ["my_requirements", "my_projects", "my_tasks", "my_approvals", "my_notifications"]) {
+                data[key] = personal[key] || [];
+            }
+        }
         document.getElementById("requirementsCount").textContent = data.requirements ?? 0;
         document.getElementById("assessmentsCount").textContent = data.assessments ?? 0;
         document.getElementById("projectsCount").textContent = data.projects ?? 0;
@@ -113,7 +131,7 @@ function renderNotifications(notifications) {
         row.className = `notification-row${item.IsRead ? "" : " unread"}`;
         const mark = document.createElement("span");
         mark.className = "notification-mark";
-        mark.textContent = item.NotificationType === "APPROVAL_REQUIRED" ? "✓" : "•";
+        mark.append(dashboardIcon(item.NotificationType === "APPROVAL_REQUIRED" ? "icon-approvals" : "icon-bell", "notification-icon"));
         const copy = document.createElement("div");
         copy.className = "notification-copy";
         const title = document.createElement("strong");

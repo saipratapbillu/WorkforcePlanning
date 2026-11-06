@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#153b30">
+    <title>Projects | AI Workforce OS</title>
+    <link rel="stylesheet" href="/static/brand.css?v=20261023a">
+    <link rel="stylesheet" href="/static/projects.css?v=20261106a">
+    <script src="/static/projects.js?v=20261106a" defer></script>
+</head>
+<body>
+    <main class="projects-shell">
+        <header class="projects-topbar">
+            <a class="os-brand" href="/dashboard" aria-label="AI Workforce OS workspace"><span class="os-brand-mark">W</span><span class="os-brand-copy"><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a>
+            <nav aria-label="Workspace"><a href="/dashboard">Overview</a><a href="/approval-center">Approvals</a><a href="/profile">Profile</a></nav>
+        </header>
+        <section class="projects-content">
+            <p class="os-eyebrow">DELIVERY PORTFOLIO</p>
+            <div class="projects-heading"><div><h1>Projects</h1><p>Projects linked to requirements visible to your account.</p></div><button id="refreshProjects" type="button" aria-label="Refresh projects">↻</button></div>
+            <p id="projectsMessage" class="projects-message" role="status" aria-live="polite">Loading projects…</p>
+            <div id="projectList" class="project-list" aria-live="polite"></div>
+        </section>
+    </main>
+</body>
+</html>

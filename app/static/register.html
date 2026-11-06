@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f4f6f2">
     <title>Create account | AI Workforce OS</title>
     <link rel="stylesheet" href="/static/brand.css?v=20261023a">
-    <link rel="stylesheet" href="/static/auth.css?v=20261022">
+    <link rel="stylesheet" href="/static/auth.css?v=20261106b">
 </head>
 <body>
     <header class="auth-header"><a class="os-brand" href="/" aria-label="AI Workforce OS home"><span class="os-brand-mark">W</span><span class="os-brand-copy"><strong>workforce<span>.</span></strong><small>OPERATING SYSTEM</small></span></a><a href="/">Return to company overview <span aria-hidden="true">↗</span></a></header>
@@ -18,13 +18,14 @@
                 <label for="email">Work email</label><input id="email" name="email" type="email" autocomplete="email" placeholder="name@company.com" required>
                 <div class="grid"><div><label for="department">Department</label><input id="department" name="department" autocomplete="organization-title" placeholder="Optional"></div><div><label for="position">Position</label><input id="position" name="position_title" placeholder="Optional"></div></div>
                 <label for="location">Office location</label><input id="location" name="office_location" autocomplete="address-level2" placeholder="Optional">
-                <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="At least 12 characters" required>
+                <label for="password">Password</label><div class="password-input"><input id="password" name="password" type="password" autocomplete="new-password" minlength="4" maxlength="128" placeholder="Password" required><button type="button" class="password-toggle" data-password-toggle="password" aria-label="Show password" aria-pressed="false">Show</button></div>
                 <button class="btn" type="submit"><span>Create account</span><span aria-hidden="true">→</span></button><p id="authMessage" class="auth-message" role="status" aria-live="polite"></p>
             </form>
             <div class="link">Already have access? <a href="/login">Sign in</a></div>
             <div class="auth-assurance"><span class="assurance-mark">◇</span>Role selection is controlled by company administration.</div>
         </div></section>
     </main>
+    <script src="/static/password-toggle.js?v=20261106c" defer></script>
     <script>
         document.getElementById("registerForm").addEventListener("submit", async (event) => {
             event.preventDefault();

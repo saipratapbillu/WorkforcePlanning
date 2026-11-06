@@ -16,6 +16,18 @@
         try { return JSON.parse(value || ""); } catch { return fallback; }
     }
 
+    async function readJson(response) {
+        try {
+            return await response.json();
+        } catch {
+            throw new Error(`Server returned an invalid response (HTTP ${response.status}).`);
+        }
+    }
+
+    function errorMessage(payload, fallback) {
+        return payload?.error?.message || payload?.detail || fallback;
+    }
+
     function alert(message, isError = false) {
         alertBox.textContent = message;
         alertBox.classList.toggle("error", isError);
@@ -439,14 +451,14 @@
         alert("");
         try {
             const profileResponse = await fetch("/auth/me", { credentials: "same-origin" });
-            const user = await profileResponse.json();
-            if (!profileResponse.ok) throw new Error(user.detail || "Your session could not be verified.");
+            const user = await readJson(profileResponse);
+            if (!profileResponse.ok) throw new Error(errorMessage(user, "Your session could not be verified."));
             state.role = user.role || "USER";
             byId("roleLabel").textContent = state.role.replaceAll("_", " ");
 
             const factoryResponse = await fetch("/workforce/factory/dashboard", { credentials: "same-origin" });
-            const factoryDashboard = await factoryResponse.json();
-            if (!factoryResponse.ok) throw new Error(factoryDashboard.detail || "Workforce readiness is unavailable.");
+            const factoryDashboard = await readJson(factoryResponse);
+            if (!factoryResponse.ok) throw new Error(errorMessage(factoryDashboard, "Workforce readiness is unavailable."));
             renderFactoryDashboard(factoryDashboard);
 
             if (state.role === "WORKFORCE_MANAGER") {
@@ -456,10 +468,10 @@
                     fetch("/workforce/reuse-metrics", { credentials: "same-origin" }),
                 ]);
                 const [roles, assessments, metrics] = await Promise.all([
-                    rolesResponse.json(), assessmentsResponse.json(), metricsResponse.json(),
+                    readJson(rolesResponse), readJson(assessmentsResponse), readJson(metricsResponse),
                 ]);
                 if (!rolesResponse.ok || !assessmentsResponse.ok || !metricsResponse.ok) {
-                    throw new Error(assessments.detail || metrics.detail || roles.detail || "Your role cannot access workforce reuse review.");
+                    throw new Error(errorMessage(assessments, errorMessage(metrics, errorMessage(roles, "Your role cannot access workforce reuse review."))));
                 }
                 state.roles = roles;
                 state.reuseAssessments = assessments;
@@ -478,12 +490,12 @@
                 fetch("/workforce/governance-catalog", { credentials: "same-origin" }),
                 fetch("/workforce/organization/status", { credentials: "same-origin" }),
             ]);
-            const roles = await rolesResponse.json();
-            const requests = await requestsResponse.json();
-            const governance = await governanceResponse.json();
-            const organization = await organizationResponse.json();
+            const roles = await readJson(rolesResponse);
+            const requests = await readJson(requestsResponse);
+            const governance = await readJson(governanceResponse);
+            const organization = await readJson(organizationResponse);
             if (!rolesResponse.ok || !requestsResponse.ok || !governanceResponse.ok || !organizationResponse.ok) {
-                throw new Error(requests.detail || roles.detail || governance.detail || organization.detail || "Your role cannot access workforce planning.");
+                throw new Error(errorMessage(requests, errorMessage(roles, errorMessage(governance, errorMessage(organization, "Your role cannot access workforce planning.")))));
             }
             state.roles = roles;
             state.requests = requests;
@@ -500,7 +512,7 @@
                     fetch("/workforce/reuse-assessments", { credentials: "same-origin" }),
                     fetch("/workforce/reuse-metrics", { credentials: "same-origin" }),
                 ]);
-                const [assessments, metrics] = await Promise.all([assessmentsResponse.json(), metricsResponse.json()]);
+                const [assessments, metrics] = await Promise.all([readJson(assessmentsResponse), readJson(metricsResponse)]);
                 if (assessmentsResponse.ok && metricsResponse.ok) renderReusePanel(metrics, assessments);
             }
             renderRequests();

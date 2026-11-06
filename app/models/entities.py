@@ -53,6 +53,34 @@ class Role(Base):
     RoleLevel: Mapped[int] = mapped_column(Integer)
     IsActive: Mapped[bool] = mapped_column(Boolean,default=True)
 
+
+class Company(Base):
+    __tablename__ = "Company"
+
+    CompanyID: Mapped[uuid.UUID] = mapped_column(UNIQUEIDENTIFIER, primary_key=True)
+    CompanyName: Mapped[str] = mapped_column(String(200))
+    Status: Mapped[str] = mapped_column(String(20))
+
+
+class Department(Base):
+    __tablename__ = "Department"
+
+    DepartmentID: Mapped[uuid.UUID] = mapped_column(UNIQUEIDENTIFIER, primary_key=True)
+    CompanyID: Mapped[uuid.UUID] = mapped_column(UNIQUEIDENTIFIER, ForeignKey("Company.CompanyID"))
+    DepartmentName: Mapped[str] = mapped_column(String(150))
+    Status: Mapped[str] = mapped_column(String(20))
+
+
+class Position(Base):
+    __tablename__ = "Position"
+
+    PositionID: Mapped[uuid.UUID] = mapped_column(UNIQUEIDENTIFIER, primary_key=True)
+    DepartmentID: Mapped[uuid.UUID] = mapped_column(UNIQUEIDENTIFIER, ForeignKey("Department.DepartmentID"))
+    PositionName: Mapped[str] = mapped_column(String(150))
+    Grade: Mapped[str] = mapped_column(String(20))
+    Status: Mapped[str] = mapped_column(String(20))
+
+
 class AppUser(Base):
     __tablename__ = "AppUser"
 
@@ -131,4 +159,3 @@ class Project(Base):
     ProjectName: Mapped[str] = mapped_column(String(300))
     Status: Mapped[str] = mapped_column(String(30))
     CreatedAtUtc: Mapped[object] = mapped_column(DateTime)
-
